@@ -4,6 +4,7 @@ import requests
 from PIL import Image
 from io import BytesIO
 import base64
+import json
 
 
 from real_gemini.gpt4v import GPT4V
@@ -17,10 +18,12 @@ app = FastAPI()
 @app.post("/main/")
 async def main(
     query: str = Form(...),
-    images: List[str] = Form(...)
+    image_paths: List[str] = Form(...)
 ):
-    query = "Guess what movie I'm acting out."
-    image_paths = ["./test/test_0.png", "./test/test_1.png", "./test/test_2.png", "./test/test_3.png"]
+    # query = "Guess what movie I'm acting out."
+    # image_paths = ["./test/images/test_0.png", "./test/images/test_1.png", "./test/images/test_2.png", "./test/images/test_3.png"]
+
+    image_paths = image_paths[0].split(",")
     print(query, image_paths)
 
     gpt4v = GPT4V()
