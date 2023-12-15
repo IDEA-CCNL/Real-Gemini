@@ -16,6 +16,11 @@ sh run.sh
 python demo.py
 ```
 
+## Acknowledgement
+- [Fastapi](https://github.com/tiangolo/fastapi)
+- [Streamlit](https://github.com/streamlit/streamlit)
+- [sagittarius](https://github.com/gregsadetsky/sagittarius)
+
 ## 关于我们 About Us
 
 IDEA研究院封神榜团队是中文大模型开源计划[Fengshenbang-LM](https://github.com/IDEA-CCNL/Fengshenbang-LM)的负责团队，开源包括[二郎神系列](https://huggingface.co/IDEA-CCNL/Erlangshen-MegatronBert-1.3B)，[太乙系列](https://huggingface.co/IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-v0.1)，[姜子牙系列](https://huggingface.co/IDEA-CCNL/Ziya2-13B-Chat)等知名模型，并收获了开源社区的广泛使用和支持。
