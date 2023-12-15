@@ -10,7 +10,8 @@ Real-time video understanding and interaction through text,audio,image and video
 sh run.sh
 ```
 
-## 启动前端界面:construction:
+## 启动前端界面
+:construction: (施工中)
 ```
 python demo.py
 ```
