@@ -8,11 +8,15 @@ from aiortc.contrib.media import MediaRecorder
 from streamlit_webrtc import WebRtcMode, webrtc_streamer
 from utils.audio2text import audio2text
 from utils.audio_improve import process_audio
+from utils.extracte_img import get_main_img
+from utils.get_gpt4v_response import gpt4v
+from utils.text2audio import text2audio
 
 st.title("Gemini-like对话测试")
 RECORD_DIR = Path("./records")
 RECORD_DIR.mkdir(exist_ok=True)
-img={'assistant':'bot.png','user':None}
+# img={'assistant':'bot.png','user':None}
+img={'assistant':None,'user':None}
 
 def app():
     """
@@ -43,26 +47,32 @@ def app():
         async_processing=True
     )
     return in_file_video,in_file_audio
-r_video_file, r_audio_file = app()
+r_video_file, r_audio_file = 'None',Path('./source/test.m4a')
 
-if r_audio_file.exists():
-    with st.status('处理录入的视频中...',state='running',expanded=True) as status:
-        st.write('抽取关键帧...')
-        time.sleep(5)
-        st.info(f'缓存好的音频：{r_audio_file}')
-        st.write('音频转文本...')
-        st.audio(str(r_audio_file))
-        input_text_from_audio = audio2text(str(r_audio_file))
-        st.info('audio2text:')
-        st.text(input_text_from_audio)
-        status.update(label="录入视频文件处理完成", state="complete", expanded=False)
+@st.cache_data(show_spinner=False)
+def preocess_video(v_file,a_file):
+    if a_file.exists():
+        with st.status('处理录入的视频中...',state='running',expanded=True) as status:
+            st.write('抽取关键帧...')
+            imgs = get_main_img(v_file)
+            cls = st.columns(len(imgs))
+            for idx,cl in enumerate(cls):
+                cl.image(imgs[idx])
+            st.write('音频转文本...')
+            st.info(f'缓存好的音频：{a_file}')
+            st.audio(str(a_file))
+            input_text_from_audio = audio2text(str(a_file))
+            st.info('audio2text:')
+            st.text(input_text_from_audio)
+            status.update(label="录入视频文件处理完成", state="complete", expanded=False)
+    return imgs,input_text_from_audio
 
-client = OpenAI(api_key="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")
+# client = OpenAI(api_key="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")
 # Set a default model
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = "gpt-3.5-turbo"
+# if "openai_model" not in st.session_state:
+#     st.session_state["openai_model"] = "gpt-3.5-turbo"
 
- 
+imgs,input_text_from_audio = preocess_video(r_video_file,r_audio_file)
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -71,9 +81,15 @@ if "messages" not in st.session_state:
 for message in st.session_state.messages:
     with st.chat_message(message["role"],avatar=img[message['role']]):
         st.markdown(message["content"])
+        if message['img'] is not None:
+            st.image(message['img'])
+        if message['audio'] is not None:
+            st.audio(message['audio'])
  
 # Accept user input
-if prompt := st.chat_input("What is up?"):
+# if prompt := st.chat_input("What is up?"):
+prompt = input_text_from_audio
+if prompt:
     # Display user message in chat message container
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -82,16 +98,22 @@ if prompt := st.chat_input("What is up?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
  
     # Display assistant response in chat message container
-    with st.chat_message("assistant",avatar='bot.png'):
-        res = client.chat.completions.create(
-                model=st.session_state["openai_model"],
-                messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
-                stream=True
-                )
-        message_placeholder = st.empty()
-        full_response = ""
-        for response in res:
-            full_response += (response.choices[0].delta.content or "")
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+    # with st.chat_message("assistant",avatar='bot.png'):
+    with st.chat_message("assistant"):
+        # res = client.chat.completions.create(
+        #         model=st.session_state["openai_model"],
+        #         messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages],
+        #         stream=True
+        #         )
+        res = gpt4v(prompt,imgs)
+        # message_placeholder = st.empty()
+        # full_response = ""
+        # for response in res:
+        #     full_response += res
+        #     message_placeholder.markdown(full_response + "▌")
+        # message_placeholder.markdown(full_response)
+        sound = text2audio(res["text"])
+        st.markdown(res['text'])
+        st.audio(sound)
+        st.image(res['imgs'])
+    st.session_state.messages.append({"role": "assistant", "content": res['text'],'imgs':res['imgs'],'audio':sound})

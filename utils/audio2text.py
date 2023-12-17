@@ -20,3 +20,8 @@ def audio2text(fin):
     resp_data = resp.json()
     prompt_text = resp_data["text"]
     return prompt_text
+
+def audio2text_test(fin):
+    import time 
+    time.sleep(2)
+    return 'audio2text 测试结果'
