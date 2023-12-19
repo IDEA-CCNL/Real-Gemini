@@ -13,21 +13,15 @@ gpt4v = GPT4V()
 app = FastAPI()
 
 
-
 # API端点
 @app.post("/main/")
 async def main(
     query: str = Form(...),
-    image_paths: List[str] = Form(...)
-):
-    # query = "Guess what movie I'm acting out."
-    # image_paths = ["./test/images/test_0.png", "./test/images/test_1.png", "./test/images/test_2.png", "./test/images/test_3.png"]
-
-    image_paths = image_paths[0].split(",")
-    print(query, image_paths)
-
-    gpt4v = GPT4V()
-    result = gpt4v.process_request(query=query, image_paths=image_paths)
+    base64_images: List[str] = Form(...)
+):  
+    base64_images = base64_images[0].split(",")
+    # print("len_base64_images",len(base64_images))
+    result = gpt4v.process_multi_image_base64(query=query, base64_images=base64_images)
 
     return result
 
