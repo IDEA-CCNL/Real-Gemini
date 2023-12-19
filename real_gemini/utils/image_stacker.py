@@ -11,6 +11,10 @@ def load_images(paths):
         images.append(image)
     return images
 
+def load_image(path):
+    image = Image.open(path)
+    return image
+
 # 保存或展示处理后图像的函数
 def save_or_show_image(base64_data, save_path=None):
     image_data = base64.b64decode(base64_data)
@@ -38,11 +42,21 @@ def scale_and_stack_images(images, scale_factor=0.3):
     canvas.save(buffered, format="JPEG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+def image2base64(image):
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
+def base642image(base64_data):
+    image_data = base64.b64decode(base64_data)
+    return Image.open(io.BytesIO(image_data))
+
 if __name__=="__main__":
-    image_paths = ["./test/test_0.png", "./test/test_1.png", "./test/test_2.png", "./test/test_3.png"]
+    image_paths = ["./test/images/test_0.png", "./test/images/test_1.png", "./test/images/test_2.png", "./test/images/test_3.png"]
     images = load_images(image_paths)
+    print(image2base64(images[0]))
     stacked_image_base64 = scale_and_stack_images(images)
     # 保存或展示处理后的图像
-    save_or_show_image(stacked_image_base64, "./test/stacked_image.jpg") # 保存到文件
+    save_or_show_image(stacked_image_base64, "./test/outputs/stacked_image.jpg") # 保存到文件
     # 或者直接展示图像
     # save_or_show_image(stacked_image_base64)
