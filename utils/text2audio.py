@@ -1,15 +1,24 @@
 import base64
 import json
 import requests
+import numpy as np
 
 def text2audio(text,):
-    import time
-    time.sleep(2)
-    # resp = requests.post(
-    #     'http://192.168.80.29:8789/asr', 
-    #     data=input_data, 
-    #     headers={"Content-Type": "application/json"}
-    #     )
-    # resp_data = resp.json()
-    # prompt_text = resp_data["text"]
-    return './source/test.m4a'
+    headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+    data = {
+        'prompt': text,
+    }
+    response = requests.post('http://192.168.81.12:6679/tts/', headers=headers, data=data)
+    res = response.json()
+    audio_array = np.frombuffer(base64.b64decode(res[0]),np.float32)
+    rate = res[1]
+    return audio_array,rate
+
+
+if __name__ == '__main__':
+    a,r = text2audio('你好')
+    print(a)
+    print(r)

@@ -3,8 +3,6 @@ import json
 import requests
 
 def get_main_img(video_file):
-    import time
-    time.sleep(5)
     # resp = requests.post(
     #     'http://192.168.80.29:8789/asr', 
     #     data=input_data, 

@@ -19,9 +19,14 @@ def audio2text(fin):
         )
     resp_data = resp.json()
     prompt_text = resp_data["text"]
+    f.close()
     return prompt_text
 
 def audio2text_test(fin):
     import time 
     time.sleep(2)
     return 'audio2text 测试结果'
+
+if __name__ == '__main__':
+    r = audio2text('records/6f64cd30-bdb6-4705-b2fb-e9207149825b_input_audio.mp3')
+    print(r)
