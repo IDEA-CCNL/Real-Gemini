@@ -25,7 +25,6 @@ class GPT4VTool(object):
         self._image_dir = image_dir # 存放视频截帧的目录路径
         self._gpt4v = ChatOpenAI(
             model="gpt-4-vision-preview",
-            openai_api_key="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",
             max_tokens=256)
     
     def inference(self, prompt: str):
