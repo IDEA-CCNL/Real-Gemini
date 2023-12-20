@@ -6,7 +6,7 @@ import argparse
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-os.environ["OPENAI_API_KEY"] = "your api key here"
+os.environ["OPENAI_API_KEY"] = "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"
 
 from real_gemini.agent import RealGeminiAgent
 
