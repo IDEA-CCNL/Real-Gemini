@@ -18,8 +18,8 @@ don't comment if they are smiling. don't comment if they are frowning. just focu
 """
 
 class GPT4VTool(object):
-    _name_ = "GPT for vision"
-    _description_ = "GPT for vision"
+    _name_ = "GPT-4-Vision"
+    _description_ = "A wrapper around OpenAI GPT4V API. Useful for image-to-text understanding when you need to generate text from some images and a text description. Input should be some images or a text."
 
     def __init__(self, image_dir: str):
         self._image_dir = image_dir # 存放视频截帧的目录路径
