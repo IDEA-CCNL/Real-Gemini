@@ -1,45 +1,70 @@
+import time
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration, WebRtcMode
+from queue import Queue
+import cv2
+from datetime import datetime
+import time
+from threading import Thread,Event
 
-class VideoRecorder(VideoProcessorBase):
-    def __init__(self):
-        self.frames = []
+class VideoRecorder():
+    def __init__(self,record_fps=0.5,max_record_time=10):
+        self.frames = Queue(120)
+        self.max_record_time = max_record_time
+        
+        self.record_fps = record_fps
+        self.stop_singl = False
+        self.process = Thread(target=self.record_v_a)
+        self.exit = Event()
 
-    def recv(self, frame):
-        print('see me!',frame)
-        self.frames.append(frame)
-        return frame
+    def record_v_a(self):
+        print('开始录制')
+        self.capture = cv2.VideoCapture(0)
+        s_t = time.time()
+        img_id = 0
+        while(True):
+            if (time.time()-s_t) % self.record_fps == 0:
+                try:
+                    ret, frame = self.capture.read()
+                except:
+                    print('error～')
+                    break
+                if ret:
+                    img_id += 1 
+                    print(f'正常进入 ret：{ret},img_id:{img_id}')
+                    frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+                    # frame.tobytes()
+                    # st.image(frame)
+                    self.frames.put(frame)
+                else:
+                    print('captrue closed')
+                    break
+                if self.exit.is_set():
+                    print('手动结束')
+                    break
+                if (time.time()-s_t) > 60:
+                    print('超时退出')
+                    break
+        self.capture.release()
+        print('录制结束')
+                    
+    
+    def stop_record(self):
+        self.exit.set()
+        print('手动杀死线程')
+        
 
-def main():
-    st.title("High-Definition Video Recorder")
-
-    webrtc_ctx = webrtc_streamer(
-        key="example",
-        video_processor_factory=VideoRecorder,
-        mode=WebRtcMode.SENDRECV,
-        async_processing=True,
-        media_stream_constraints={
-            'audio':{},
-            'video':{'height':360,'width':640}
-        },
-        video_receiver_size=10,
-        audio_receiver_size=10,
-    )
-
-    if webrtc_ctx.video_processor:
-        print(
-            webrtc_ctx.video_processor.frames
-        )
-        print(len(webrtc_ctx.video_processor.frames))
-        for img in webrtc_ctx.video_processor.frames:
-            st.image(img)
-        # st.video(webrtc_ctx.video_processor.frames)
-
-    if st.button("Save Video"):
-        if webrtc_ctx.video_processor:
-            save_path = "recorded_video.mp4"
-            webrtc_ctx.video_processor.frames.save_as_video(save_path)
-            st.success(f"Video saved at {save_path}")
 
 if __name__ == "__main__":
-    main()
+    # https://blog.csdn.net/qq_42069296/article/details/133792896
+    if st.button('开始录制'):
+        st.camera_input('tt',label_visibility='hidden')
+        recorder = VideoRecorder()
+        recorder.process.start()
+        time.sleep(10)
+        recorder.stop_record()
+        print(recorder.frames)
+        for _ in range(10):
+            st.image(recorder.frames.get())
+        print('ok~')
+

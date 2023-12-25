@@ -1,83 +1,83 @@
-import av
-import pydub
-import numpy as np
-from aiortc.contrib.media import MediaRecorder
-from streamlit_webrtc import WebRtcMode, webrtc_streamer
-from streamlit_mic_recorder import mic_recorder,speech_to_text
+import time
+import streamlit as st
+from queue import Queue
+import cv2
+from datetime import datetime
+import time
+from threading import Thread,Event
+import speech_recognition as sr 
+from utils.audio2text import audio2text_from_bytes
 
-def process_audio(frame: av.AudioFrame) -> av.AudioFrame:
-    raw_samples = frame.to_ndarray()
-    sound = pydub.AudioSegment(
-        data=raw_samples.tobytes(),
-        sample_width=frame.format.bytes,
-        frame_rate=frame.sample_rate,
-        channels=len(frame.layout.channels),
-    )
-    sound = sound.apply_gain(0)
-    # Ref: https://github.com/jiaaro/pydub/blob/master/API.markdown#audiosegmentget_array_of_samples  # noqa
-    channel_sounds = sound.split_to_mono()
-    channel_samples = [s.get_array_of_samples() for s in channel_sounds]
-    new_samples: np.ndarray = np.array(channel_samples).T
-    new_samples = new_samples.reshape(raw_samples.shape)
-    new_frame = av.AudioFrame.from_ndarray(new_samples, layout=frame.layout.name)
-    new_frame.sample_rate = frame.sample_rate
-    return new_frame
+class VideoRecorder():
+    def __init__(self,record_fps=0.5,max_record_time=60):
+        self.frames = list()
+        self.max_record_time = max_record_time
+        self.record_fps = record_fps
+        self.stop_singl = False
+        self.process = Thread(target=self.record_v_a)
+        self.exit = Event()
 
-def record_video(video_save_path,audio_save_path):
-    """
-    该方法位录制视频和声音，单独提取声音
-    """
-    def in_recorder_factory_video() -> MediaRecorder:
-        video_file = MediaRecorder(str(video_save_path), format="mp4")
-        return video_file
-    def in_recorder_factory_audio() -> MediaRecorder:
-        audio_file = MediaRecorder(str(audio_save_path), format="mp3")
-        return audio_file
-    webrtc_streamer(
-        key="video_record",
-        mode=WebRtcMode.SENDRECV,
-        media_stream_constraints={
-            "video": True,
-            "audio": True,
-        },
-        audio_frame_callback=process_audio,
-        in_recorder_factory=in_recorder_factory_video,
-        out_recorder_factory=in_recorder_factory_audio,
-        async_processing=True
-    )
-    return video_save_path,audio_save_path
+    def record_v_a(self):
+        print('开始录制')
+        self.capture = cv2.VideoCapture(0)
+        self.capture.set(3,640) # with
+        self.capture.set(4,480) # hight
+        s_t = time.time()
+        img_id = 0
+        while(True):
+            if (time.time()-s_t) % self.record_fps == 0:
+                try:
+                    ret, frame = self.capture.read()
+                except:
+                    print('error～')
+                    break
+                if ret:
+                    img_id += 1 
+                    print(f'正常进入 ret：{ret},img_id:{img_id}')
+                    frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+                    # st.image(frame)
+                    self.frames.append(frame)
+                    # self.frames.put(frame)
+                else:
+                    print('captrue closed')
+                    break
+                if self.exit.is_set():
+                    print('手动结束')
+                    break
+                if (time.time()-s_t) > self.max_record_time:
+                    print('超时退出')
+                    break
+        self.capture.release()
+        print('录制结束')
 
-def record_audio():
-    audio=mic_recorder(
-            start_prompt="开始录音",
-            stop_prompt="录音结束", 
-            just_once=False,
-            use_container_width=False,
-            callback=None,
-            args=(),
-            kwargs={},
-            key='audio_record'
-        )
-    return audio
-    
-def audio2text(language):
-    text=speech_to_text(
-            language=language,
-            start_prompt="Start recording",
-            stop_prompt="Stop recording", 
-            just_once=False,
-            use_container_width=False,
-            callback=None,
-            args=(),
-            kwargs={},
-            key='speech2text'
-        )
-    print(text)
-    return text
+    def stop_record(self):
+        self.exit.set()
+        print('手动杀死线程')
+        
 
-if __name__ == '__main__':
-    import streamlit as st
-    st.info('test')
-    audio = record_audio()
-    if audio:
-        st.audio(audio['bytes'])
+def record():
+    r = sr.Recognizer()
+    r.energy_threshold=500 # 检测声音的阈值
+    with sr.Microphone() as source:
+        video_record = VideoRecorder()
+        st.write('请开始说话，下面开始监听') 
+        # phrase_time_limit 最大录制时常，timeout 等待时常
+        video_record.process.start()# 这个会进行录像
+        audio = r.listen(source,phrase_time_limit=15,timeout=3)
+        time.sleep(3) # 额外往后录制2秒钟
+        video_record.stop_record()
+    return video_record.frames,audio
+
+if __name__ == "__main__":
+    # https://blog.csdn.net/qq_42069296/article/details/133792896
+    if st.button('开始录制'):
+        st.camera_input('tt',label_visibility='hidden')
+        recorder = VideoRecorder()
+        recorder.process.start()
+        time.sleep(10)
+        recorder.stop_record()
+        print(recorder.frames)
+        for _ in range(10):
+            st.image(recorder.frames.get())
+        print('ok~')
+

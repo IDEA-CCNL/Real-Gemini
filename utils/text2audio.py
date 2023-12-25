@@ -15,10 +15,12 @@ def text2audio(text,):
     res = response.json()
     audio_array = np.frombuffer(base64.b64decode(res[0]),np.float32)
     rate = res[1]
-    return audio_array,rate
+    bytes_audio = base64.b64decode(res[0])
+    return audio_array,rate,audio_array.tobytes()
 
 
 if __name__ == '__main__':
-    a,r = text2audio('你好')
+    a,r,b = text2audio('你好')
     print(a)
     print(r)
+    print(b)
