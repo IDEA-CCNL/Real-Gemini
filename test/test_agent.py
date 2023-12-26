@@ -6,7 +6,7 @@ import argparse
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "your api key here"
 
 from real_gemini.agent import ReActAgent
 from real_gemini.agent import SimpleRouterAgent
