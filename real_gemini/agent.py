@@ -6,9 +6,10 @@ from langchain.chat_models import ChatOpenAI
 from langchain.agents.tools import Tool
 from langchain.agents import initialize_agent, load_tools, AgentType
 from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
 from langchain_core.output_parsers import StrOutputParser
 
-from .gpt4v_langchain import GPT4VTool
+from .tools.gpt4v_tool import GPT4VTool
 
 class SimpleGPT4VAgent(object):
     def __init__(self, image_dir: str):
@@ -20,15 +21,17 @@ class SimpleGPT4VAgent(object):
         return output
 
 class ReActAgent(object):
-    def __init__(self, image_dir: str):
+
+    def __init__(self):
         self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
         # self.llm = OpenAI(temperature=0.5)
-        gpt4v = GPT4VTool(image_dir)
+        gpt4v = GPT4VTool()
         self.tools = [Tool(
               name=gpt4v._name_,
               description=gpt4v._description_,
               func=gpt4v.inference,
         )]
+        memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools.extend(load_tools(["dalle-image-generator"]))
         self.agent = initialize_agent(
               tools=self.tools,
@@ -37,10 +40,12 @@ class ReActAgent(object):
               verbose=True,
         )
 
-    def run(self, prompt: str):
+    def run(self, prompt: str, image_dir: str):
+        prompt_template = PromptTemplate.from_template(
+            "请根据这个目录下的图片，回答我的问题。\n图片目录：{image_dir}\n问题：{prompt}"
+        )
+        prompt = prompt_template.format(prompt=prompt, image_dir=image_dir)
         output = self.agent.run(prompt)
-        # output = self.gpt4v.inference(prompt)
-        # print(output)
         return output
 
 INTENT_TEMPLATE = """

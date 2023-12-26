@@ -6,7 +6,7 @@ import argparse
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from real_gemini.gpt4v_langchain import GPT4VTool
+from real_gemini.tools.gpt4v_tool import GPT4VTool
 
 if __name__ == '__main__':
     # arguments containing: config_path, ckpt_path, max_length
