@@ -16,10 +16,11 @@ if __name__ == '__main__':
     args_parser = argparse.ArgumentParser("test gpt4v for langchain tools")
     args_parser.add_argument("--prompt", type=str, help="prompt string", required=True)
     args_parser.add_argument("--image_path_or_dir", type=str, help="image path or dir", required=True)
+    args_parser.add_argument("--device", type=str, help="the device to run the tool", default="cuda") 
     args = args_parser.parse_args()
 
     # image dir是过去一段时间截帧的图片目录
-    agent = ReActAgent()
+    agent = ReActAgent(args.device)
     # agent = SimpleRouterAgent(image_dir=args.image_dir)
     output = agent.run(prompt=args.prompt, image_path_or_dir=args.image_path_or_dir)
     print("output:", output)

@@ -25,9 +25,10 @@ class SimpleGPT4VAgent(object):
 
 class ReActAgent(object):
 
-    def __init__(self):
+    def __init__(self, device: str):
         self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
         # self.llm = OpenAI(temperature=0.5)
+        self.device = device
         gpt4v = GPT4VTool()
         self.tools = [Tool(
               name=gpt4v._name_,
@@ -38,25 +39,25 @@ class ReActAgent(object):
             return_messages=True,
             memory_key="chat_history", output_key='output')
         self.tools.extend(load_tools(["dalle-image-generator"]))
-        sam = Segmenting(device="cuda")
+        sam = Segmenting(device=self.device)
         self.tools.append(Tool(
                 name=sam._name_,
                 description=sam._description_,
                 func=sam.inference_all,
         ))
-        controlnet = Image2Pose(device="cuda")
+        controlnet = Image2Pose(device=device)
         self.tools.append(Tool(
                 name=controlnet._name_,
                 description=controlnet._description_,
                 func=controlnet.inference,
         ))
-        dino = Text2Box(device="cuda")
+        dino = Text2Box(device=device)
         self.tools.append(Tool(
                 name=dino._name_,
                 description=dino._description_,
                 func=dino.inference,
         ))
-        inpainting = Inpainting(device="cuda")
+        inpainting = Inpainting(device=device)
         image_editing = ImageEditing(dino, sam, inpainting)
         self.tools.append(Tool(
                 name=image_editing._remove_name_,
