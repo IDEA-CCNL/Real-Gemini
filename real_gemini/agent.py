@@ -10,7 +10,10 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.output_parsers import StrOutputParser
 
 from .tools.gpt4v_tool import GPT4VTool
-
+from .tools.controlnet_tool import Image2Pose
+from .tools.sam_tool import Segmenting
+from .tools.dino_tool import Text2Box
+from .tools.imageediting_tool import ImageEditing, Inpainting
 class SimpleGPT4VAgent(object):
     def __init__(self, image_dir: str):
         self.gpt4v = GPT4VTool(image_dir)
@@ -33,6 +36,37 @@ class ReActAgent(object):
         )]
         memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
         self.tools.extend(load_tools(["dalle-image-generator"]))
+        sam = Segmenting(device="cuda")
+        self.tools.append(Tool(
+                name=sam._name_,
+                description=sam._description_,
+                func=sam.inference_all,
+        ))
+        controlnet = Image2Pose(device="cuda")
+        self.tools.append(Tool(
+                name=controlnet._name_,
+                description=controlnet._description_,
+                func=controlnet.inference,
+        ))
+        dino = Text2Box(device="cuda")
+        self.tools.append(Tool(
+                name=dino._name_,
+                description=dino._description_,
+                func=dino.inference,
+        ))
+        inpainting = Inpainting(device="cuda")
+        image_editing = ImageEditing(dino, sam, inpainting)
+        self.tools.append(Tool(
+                name=image_editing._remove_name_,
+                description=image_editing._remove_description_,
+                func=image_editing.inference_remove,
+        ))
+        self.tools.append(Tool(
+                name=image_editing._replace_name_, 
+                description=image_editing._replace_description_,
+                func=image_editing.inference_replace_sam,
+        ))
+
         self.agent = initialize_agent(
               tools=self.tools,
               llm=self.llm,
@@ -45,7 +79,7 @@ class ReActAgent(object):
             "请根据这个目录下的图片，回答我的问题。\n图片目录：{image_dir}\n问题：{prompt}"
         )
         prompt = prompt_template.format(prompt=prompt, image_dir=image_dir)
-        output = self.agent.run(prompt)
+        output = self.agent.run({"input":prompt,"chat_history":[]})
         return output
 
 INTENT_TEMPLATE = """
