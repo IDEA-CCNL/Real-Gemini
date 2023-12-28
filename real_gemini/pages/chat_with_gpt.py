@@ -1,7 +1,7 @@
 import streamlit as st
 from openai import OpenAI
-
-OPENAI_API_KEY = "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"
+import os 
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 st.title("ChatGPT-like")
 

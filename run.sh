@@ -1,2 +1,2 @@
-export OPENAI_API_KEY="YOUR_API_KEY"
-python main.py
+export OPENAI_API_KEY='your-api-key'
+streamlit run ./real_gemini/chat.py
