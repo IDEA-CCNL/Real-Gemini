@@ -3,6 +3,7 @@
 import os
 import json
 from typing import List
+from langchain.memory import ChatMessageHistory
 from langchain.chat_models import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -20,35 +21,34 @@ don't comment if they are smiling. don't comment if they are frowning. just focu
 
 class GPT4VTool(object):
     _name_ = "GPT-4-Vision"
-    _description_ = "这个工具是GPT for vision的调用接口。用于图像到文本的理解。本工具的输入是一段文本指令和一张或者多张图片，请注意，工具的输入由一个JSON字符串组成，json包括两个key，question和image_dir。question表示文本指令，image_dir表示存放图片的目录。例如：{{\"question\": QUESTION, \"image_dir\": IMAGE_DIR}}。A wrapper around OpenAI GPT4V API. Useful for image-to-text understanding when you need to generate text from some images and a text description. The input of this tool is a text prompt and one or more images. Please note, the input of the tool consists of a JSON string, the json includes two keys, question and image_dir. The question represents text instructions, and image_dir represents the directory where the images are stored or the image paths. For example: {{\"question\": QUESTION, \"image_dir\": IMAGE_DIR}}."
+    _description_ = "这个工具是GPT for vision的调用接口。用于图像到文本的理解。本工具的输入是一段文本指令和一张或者多张图片，请注意，工具的输入由一个JSON字符串组成，json包括两个key，question和image_dir。question表示文本指令，image_dir表示存放图片的目录。例如：{{\"question\": QUESTION, \"image_dir\": IMAGE_DIR}}。A wrapper around OpenAI GPT4V API. Useful for image-to-text understanding when you need to generate text from some images and a text description. The input of this tool is a text prompt and one or more images. Please note, the input of the tool consists of a JSON string, the json includes two keys, question and image_dir. The question represents text instructions, and image_dir represents the directory where the images are stored. For example: {{\"question\": QUESTION, \"image_dir\": IMAGE_DIR}}."
 
     def __init__(self):
         self._gpt4v = ChatOpenAI(
             model="gpt-4-vision-preview",
             max_tokens=256)
-    
-    def inference(self, input_str: str):
-        input_dict = json.loads(input_str)
-        image_dir = input_dict["image_dir"]
-        if os.path.isdir(image_dir):
-            image_paths = [
-                os.path.join(image_dir, path) for path in os.listdir(image_dir)
-            ]
-        else:
-            image_paths = image_dir.split(",")
-        base64_images = []
-        for image_path in image_paths:
-            base64_image = image2base64(load_image(image_path))
-            base64_images.append(f"data:image/jpeg;base64,{base64_image}")
-
-        messages = []
-        messages.append(
+        self.history = ChatMessageHistory()
+        self.history.add_message(
             SystemMessage(
                 content=[
                     {"type": "text", "text": _OPEN_AI_SYSTEM_PROMPT}
                 ]
             )
         )
+    
+    def inference(self, input_str: str):
+        input_dict = json.loads(input_str)
+        image_path = input_dict["image"]
+        if os.path.isdir(image_path):
+            image_paths = [
+                os.path.join(image_path, path) for path in os.listdir(image_path)]
+        else:
+            image_paths = [image_path]
+        base64_images = []
+        for image_path in image_paths:
+            base64_image = image2base64(load_image(image_path))
+            base64_images.append(f"data:image/jpeg;base64,{base64_image}")
+
         human_contents = []
         human_contents.append({"type": "text", "text": input_dict["question"]})
         for base64_image in base64_images:
@@ -56,8 +56,10 @@ class GPT4VTool(object):
                 "type": "image_url",
                 "image_url": {"url": base64_image}
             }) # images
-        messages.append(HumanMessage(content=human_contents))
+        self.history.add_message(HumanMessage(content=human_contents))
 
-        response_msg = self._gpt4v.invoke(messages)
+        response_msg = self._gpt4v.invoke(self.history.messages)
         # print(response_msg.content)
+        self.history.add_message(response_msg)
+        # print(self.history.messages)
         return response_msg.content
