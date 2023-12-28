@@ -31,21 +31,27 @@ class ReActAgent(object):
               description=gpt4v._description_,
               func=gpt4v.inference,
         )]
-        memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
+        memory = ConversationBufferMemory(
+            return_messages=True,
+            memory_key="chat_history", output_key='output')
         self.tools.extend(load_tools(["dalle-image-generator"]))
         self.agent = initialize_agent(
               tools=self.tools,
               llm=self.llm,
+              memory=memory,
               agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
               verbose=True,
         )
 
-    def run(self, prompt: str, image_dir: str):
+    def run(self, prompt: str, image_path_or_dir: str):
         prompt_template = PromptTemplate.from_template(
-            "请根据这个目录下的图片，回答我的问题。\n图片目录：{image_dir}\n问题：{prompt}"
+            "请参考这个{path_or_dir}下的图片，回答我的问题，请注意，图片和问题可能是没有关联的，你需要自己进行判断。\n图片{path_or_dir}：{image}\n问题：{prompt}"
         )
-        prompt = prompt_template.format(prompt=prompt, image_dir=image_dir)
+        prompt = prompt_template.format(
+            prompt=prompt, image=image_path_or_dir,
+            path_or_dir="目录" if os.path.isdir(image_path_or_dir) else "路径")
         output = self.agent.run(prompt)
+        print(self.agent.memory.load_memory_variables({}))
         return output
 
 INTENT_TEMPLATE = """
