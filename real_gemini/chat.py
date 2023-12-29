@@ -3,13 +3,17 @@ import streamlit as st
 from pathlib import Path
 from utils_st.audio2text import audio2text_from_bytes
 from utils_st.extracte_img import get_main_img
-from utils_st.get_gpt4v_response import gpt4v,gpt4v_client
+from utils_st.get_gpt4v_response import gpt4v_client
+from utils_st.get_qwen_response import QwenVL_client
 from utils_st.text2audio import text2audio,autoplay_audio
 from utils_st.record_video import record
 from queue import Queue
 import time
 import cv2
 from threading import Thread,Event
+
+img = {'assistant':'./source/bot.png','user':None}
+res_ = {'Qwen-vl':QwenVL_client,'gpt4v':gpt4v_client}
 
 # 设置事件锁
 event_record = Event()
@@ -19,7 +23,9 @@ event_record.set() # 初始打开录音锁
 with st.sidebar:
     with st.form('参数配置'):
         max_chat_turn = st.slider('最大对话轮数:',min_value=1,max_value=10000,value=10)
+        response_name = st.selectbox('选择模型',['Qwen-vl','gpt4v'],index=1)
         st.form_submit_button('提交配置')
+responser = res_[response_name]
 max_record_round = 2*max_chat_turn
 q = Queue(max_record_round)
 
@@ -34,7 +40,7 @@ st.title("Gemini-like对话测试")
 # in_file_audio = RECORD_DIR / f"{prefix}_input_audio.mp3"
 #########################存储录入的文件#####################
 # 对话机器人的图标
-img={'assistant':'./source/bot.png','user':None}
+
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -47,6 +53,7 @@ def my_recorder():
         print(f'record {i}')
         imgs,audio = record()
         input_text,code_status,request_id = audio2text_from_bytes(audio.get_wav_data())
+        # 过滤一些无意义的文本
         if input_text and len(input_text)>5:
             q.put((imgs,audio,input_text))
         else:
@@ -97,7 +104,7 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
             st.session_state.messages.append({"role": "user", "content": prompt})
         # Display assistant response in chat message container
         with st.chat_message("assistant",avatar='./source/bot.png'):
-            res = gpt4v_client(query=prompt,imgs=imgs)
+            res = responser(query=prompt,imgs=imgs)
             print('res[text]:',res['text'])
             if audio_response:
                 sound,rate,byte_sound_array = text2audio(res["text"])
@@ -127,6 +134,7 @@ if __name__ == '__main__':
     video_show.camera_input('tt',label_visibility='hidden')
     # 开始录入输入
     if video_show.button('开始对话'):
+        st.info(f'开始监听麦克风...')
         record_thread.start()
     else:
         st.stop()
