@@ -1,6 +1,7 @@
 import base64
 import json
 import requests
+from image_selector import ImageSelector
 
 def get_main_img(imgs):
     # resp = requests.post(
@@ -10,4 +11,9 @@ def get_main_img(imgs):
     #     )
     # resp_data = resp.json()
     # prompt_text = resp_data["text"]
-    return imgs[::2]
+    image_selector = ImageSelector(5)
+
+    top_frames = image_selector.select_best_frames(
+        imgs, 5
+    )
+    return top_frames
