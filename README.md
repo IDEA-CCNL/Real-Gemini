@@ -4,17 +4,25 @@ Real-time video understanding and interaction through text,audio,image and video
 
 利用多模态大模型的实时视频理解和交互框架，通过文本、语音、图像和视频和这是世界进行问答和交流。
 
-## 启动后端服务
+## 启动前端对话服务
+主要实现了下面2个功能
+
+- 1、streamlit对话界面
+- 2、gpt4v请求接口
+
 打开`run.sh`输入自己的api key, 然后启动
 ```shell
 sh run.sh
 ```
-
-## 启动前端界面
-:construction: (施工中)
+## TTS和ASR服务
+- ASR
+服务调用自S组（TODO：要不要更新一个服务在这里）
+- TTS
+见[tts.py](./real_gemini/tts.py)，启动脚本：
+```shell
+python tts.py
 ```
-python demo.py
-```
+启动这些服务需要一些额外的环境和模型：`torch, torchaudio, TTS`，用`pip`安装即可，模型文件路径见py脚本。
 
 ## Acknowledgement
 - [Fastapi](https://github.com/tiangolo/fastapi)
