@@ -6,10 +6,10 @@ import argparse
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-os.environ["OPENAI_API_KEY"] = "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"
+# os.environ["OPENAI_API_KEY"] = "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"
 
 from real_gemini.agent import ReActAgent
-from real_gemini.agent import SimpleRouterAgent
+
 
 if __name__ == '__main__':
     # arguments containing: config_path, ckpt_path, max_length

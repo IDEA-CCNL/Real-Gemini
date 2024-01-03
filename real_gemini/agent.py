@@ -11,10 +11,10 @@ from langchain_core.output_parsers import StrOutputParser
 
 from .tools.gpt4v_tool import GPT4VTool
 from .tools.music_tool import Text2MusicTool
-from .tools.controlnet_tool import Image2Pose
-from .tools.sam_tool import Segmenting
-from .tools.dino_tool import Text2Box
-from .tools.imageediting_tool import ImageEditing, Inpainting
+from .tools.controlnet_tool import Image2PoseTool
+from .tools.sam_tool import SegmentingTool
+from .tools.dino_tool import Text2BoxTool
+from .tools.imageediting_tool import ImageEditingTool
 class SimpleGPT4VAgent(object):
     def __init__(self, image_dir: str):
         self.gpt4v = GPT4VTool(image_dir)
@@ -50,30 +50,26 @@ class ReActAgent(object):
                 func=music_tool.inference,
             )
         ]
-        memory = ConversationBufferMemory(
-            return_messages=True,
-            memory_key="chat_history", output_key='output')
         self.tools.extend(load_tools(["dalle-image-generator"]))
-        sam = Segmenting(device=self.device)
+        sam = SegmentingTool()
         self.tools.append(Tool(
                 name=sam._name_,
                 description=sam._description_,
-                func=sam.inference_all,
+                func=sam.inference,
         ))
-        controlnet = Image2Pose(device=device)
+        controlnet = Image2PoseTool()
         self.tools.append(Tool(
                 name=controlnet._name_,
                 description=controlnet._description_,
                 func=controlnet.inference,
         ))
-        dino = Text2Box(device=device)
+        dino = Text2BoxTool()
         self.tools.append(Tool(
                 name=dino._name_,
                 description=dino._description_,
                 func=dino.inference,
         ))
-        inpainting = Inpainting(device=device)
-        image_editing = ImageEditing(dino, sam, inpainting)
+        image_editing = ImageEditingTool()
         self.tools.append(Tool(
                 name=image_editing._remove_name_,
                 description=image_editing._remove_description_,
@@ -85,6 +81,10 @@ class ReActAgent(object):
                 func=image_editing.inference_replace_sam,
         ))
 
+        memory = ConversationBufferMemory(
+            return_messages=True,
+            memory_key="chat_history", output_key='output')
+        
         self.agent = initialize_agent(
               tools=self.tools,
               llm=self.llm,
