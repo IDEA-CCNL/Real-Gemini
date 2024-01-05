@@ -78,3 +78,7 @@ tzlocal==5.2
 urllib3==2.1.0
 validators==0.22.0
 zipp==3.17.0
+openai
+opencv_python
+streamlit
+SpeechRecognition
