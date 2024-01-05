@@ -31,9 +31,15 @@ When you have a response to say to the Human, or if you do not need to use a too
 Thought: Do I need to use a tool? No
 {ai_prefix}: [your response here]
 ```
+
+MAKE SURE your response MUST in Chinese.
+
 """
 
 SUFFIX = """Begin!
+
+MAKE SURE your response MUST in Chinese.
+请使用中文回答我的问题。
 
 Previous conversation history:
 {chat_history}
