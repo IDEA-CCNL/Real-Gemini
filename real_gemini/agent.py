@@ -16,7 +16,7 @@ from .tools.music_tool import Text2MusicTool
 class ReActAgent(object):
 
     def __init__(self):
-        self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
+        self.llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
         # self.llm = OpenAI(temperature=0.5)
         gpt4v = GPT4VTool()
         # weather_tool = WeatherTool()
@@ -47,7 +47,7 @@ class ReActAgent(object):
               llm=self.llm,
               memory=memory,
               agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
-              verbose=False,
+              verbose=True,
         )
 
     def run(self, prompt: str, image_path_or_dir: str):
@@ -59,4 +59,4 @@ class ReActAgent(object):
             path_or_dir="目录" if os.path.isdir(image_path_or_dir) else "路径")
         output = self.agent.run(prompt)
         # print(self.agent.memory.load_memory_variables({}))
-        return output
+        return {"text": output}
