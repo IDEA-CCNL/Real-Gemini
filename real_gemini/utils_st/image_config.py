@@ -1,5 +1,3 @@
-import os
-
 class ImageSelector:
     # Setting for optimum Brightness values
     min_brightness_value = 10.0

@@ -12,7 +12,7 @@ from skimage import img_as_float
 import itertools  
 import time
 from multiprocessing import Pool
-import image_config as config
+import utils_st.image_config as config
 
 
 class ImageSelector(object):

@@ -1,9 +1,9 @@
 import base64
 import json
 import requests
-from image_selector import ImageSelector
+from utils_st.image_selector import ImageSelector
 
-def get_main_img(imgs):
+def get_main_img(imgs, num_frames):
     # resp = requests.post(
     #     'http://192.168.80.29:8789/asr', 
     #     data=input_data, 
@@ -14,6 +14,6 @@ def get_main_img(imgs):
     image_selector = ImageSelector(5)
 
     top_frames = image_selector.select_best_frames(
-        imgs, 5
+        imgs, num_frames
     )
     return top_frames

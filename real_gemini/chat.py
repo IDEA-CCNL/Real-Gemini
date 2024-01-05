@@ -146,7 +146,7 @@ if __name__ == '__main__':
             with placeholder.status('处理输入信号...',state='running',expanded=True) as status:
                 if len(imgs)>0:
                     st.write('getMainFrame...')
-                    imgs = get_main_img(imgs)
+                    imgs = get_main_img(imgs, 5)
                     imgs = imgs[-3:]
                     cls = st.columns(min(3,len(imgs)))
                     for idx,cl in enumerate(cls):
