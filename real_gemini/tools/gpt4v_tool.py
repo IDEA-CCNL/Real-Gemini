@@ -23,11 +23,11 @@ class GPT4VTool(object):
     _name_ = "GPT-4-Vision"
     _description_ = "这个工具是GPT for vision的调用接口。用于图像到文本的理解。本工具的输入是一段文本指令和一张或者多张图片，请注意，工具的输入由一个JSON字符串组成，json包括两个key，question和image_input。question表示文本指令，image_input表示图片路径或存放图片的目录。例如：{{\"question\": QUESTION, \"image_input\": IMAGE_PATH_OR_DIR}}。A wrapper around OpenAI GPT4V API. Useful for image-to-text understanding when you need to generate text from some images and a text description. The input of this tool is a text prompt and one or more images. Please note, the input of the tool consists of a JSON string, the json includes two keys, question and image_input. The question represents text instructions, and image_input represents the image path or the directory where the images are stored. For example: {{\"question\": QUESTION, \"image_input\": IMAGE_PATH_OR_DIR}}."
 
-
     def __init__(self):
         self._gpt4v = ChatOpenAI(
             model="gpt-4-vision-preview",
             max_tokens=256)
+        self.max_dialog_turn = 3
         self.history = ChatMessageHistory()
         self.history.add_message(
             SystemMessage(
@@ -60,7 +60,15 @@ class GPT4VTool(object):
         self.history.add_message(HumanMessage(content=human_contents))
 
         response_msg = self._gpt4v.invoke(self.history.messages)
-        # print(response_msg.content)
+        # 历史只保留一张图
+        self.history.messages.pop()
+        human_contents = []
+        human_contents.append({"type": "text", "text": input_dict["question"]})
+        human_contents.append({"type": "image_url", "image_url": {"url": base64_images[-1]}})
+        self.history.add_message(HumanMessage(content=human_contents))
         self.history.add_message(response_msg)
+        # 只保留self.max_dialog_turn轮对话
+        if len(self.history.messages) > 1 + 2 * self.max_dialog_turn:
+            self.history.messages = [self.history.messages[0]] + self.history.messages[-2 * self.max_dialog_turn: ]
         # print(self.history.messages)
         return response_msg.content
