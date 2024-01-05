@@ -14,7 +14,7 @@ class Text2MusicTool(object):
         self.translator = ChatOpenAI(
             model="gpt-3.5-turbo",
             max_tokens=256)
-        self.host = "192.168.81.13"
+        self.host = "0.0.0.0"
         self.port = 6678
     
     def inference(self, input_str: str):
