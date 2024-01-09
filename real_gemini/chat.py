@@ -146,18 +146,18 @@ if __name__ == '__main__':
             with placeholder.status('处理输入信号...',state='running',expanded=True) as status:
                 if len(imgs)>0:
                     st.write('getMainFrame...')
-                    imgs = get_main_img(imgs)
-                    imgs = imgs[-3:]
-                    cls = st.columns(min(3,len(imgs)))
-                    for idx,cl in enumerate(cls):
-                        cl.image(cv2.cvtColor(imgs[idx],cv2.COLOR_BGR2RGB))
+                    imgs = get_main_img(imgs, 3)
+                    # imgs = imgs[-3:]
+                    cls = st.columns(min(3, len(imgs)))
+                    for idx, cl in enumerate(cls):
+                        cl.image(cv2.cvtColor(imgs[idx], cv2.COLOR_BGR2RGB))
                 st.audio(audio.get_wav_data())
                 st.text(f'识别后的文本：{input_text}')
                 status.update(label="输入信号处理完成", state="complete", expanded=False)
             with chat_placeholder.container():# 1.30支持设置 height=300px
                 # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
                 # show_chat_message_from_history() # 现在关闭展示历史，只展示单轮
-                response(prompt=input_text,imgs=imgs,autoplay=True,audio_response=True)
+                response(prompt=input_text, imgs=imgs, autoplay=True, audio_response=True)
                 print('对话完毕，释放录音锁，打开对话锁')
                 # 对话响应完毕，打开事件
                 event_record.set()
