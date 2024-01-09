@@ -1,6 +1,7 @@
 import base64
 import json
 import requests
+import numpy as np
 from utils_st.image_selector import ImageSelector
 
 def get_main_img(imgs, num_frames):
@@ -16,4 +17,11 @@ def get_main_img(imgs, num_frames):
     top_frames = image_selector.select_best_frames(
         imgs, num_frames
     )
-    return top_frames
+
+    sorted_frames = []
+    for i in range(len(imgs)):
+        for j in range(len(top_frames)):
+            if np.all(imgs[i]==top_frames[j]):
+                sorted_frames.append(imgs[i])
+
+    return sorted_frames
