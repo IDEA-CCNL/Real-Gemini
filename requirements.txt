@@ -83,3 +83,4 @@ openai
 opencv_python
 streamlit
 SpeechRecognition
+python-dotenv

@@ -11,13 +11,10 @@ from threading import Thread,Event
 
 import traceback
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-from real_gemini.utils_st.audio2text import audio2text_from_bytes
-from real_gemini.utils_st.extracte_img import get_main_img
-from real_gemini.utils_st.get_gpt4v_response import gpt4v,gpt4v_client
-from real_gemini.utils_st.text2audio import text2audio,autoplay_audio
-from real_gemini.utils_st.record_video import record
+from .utils_st.audio2text import audio2text_from_bytes
+from .utils_st.extracte_img import get_main_img
+from .utils_st.text2audio import text2audio,autoplay_audio
+from .utils_st.record_video import record
 
 # 设置事件锁
 event_record = Event()
@@ -138,7 +135,7 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
             # 如果有图片的话
             try:
                 st.image(res['image'])
-                time.sleep(10)
+                # time.sleep(10)
             except:
                 pass
             # 由于是自动播放音频，需要等待音频播放完毕
@@ -147,7 +144,7 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
             # 如果有音频的话
             try:
                 st.audio(res['audio'])
-                time.sleep(10)
+                # time.sleep(10)
             except:
                 traceback.print_exc()
                 pass
@@ -191,7 +188,7 @@ def launch():
                 status.update(label="输入信号处理完成", state="complete", expanded=False)
             with chat_placeholder.container():# 1.30支持设置 height=300px
                 # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
-                # show_chat_message_from_history() # 现在关闭展示历史，只展示单轮
+                show_chat_message_from_history()
                 response(prompt=input_text,imgs=imgs,autoplay=True,audio_response=True)
                 print('对话完毕，释放录音锁，打开对话锁')
                 # 对话响应完毕，打开事件
