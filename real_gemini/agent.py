@@ -1,6 +1,7 @@
 #encoding=utf8
 
 import os
+import re
 from langchain.chat_models import ChatOpenAI
 from langchain.agents.tools import Tool
 from langchain.agents import initialize_agent, load_tools, AgentType
@@ -19,6 +20,7 @@ class ReActAgent(object):
 
     def __init__(self):
         self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
+        # self.llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
         gpt4v = GPT4VTool()
         # weather_tool = WeatherTool()
         music_tool = Text2MusicTool()
@@ -94,4 +96,32 @@ class ReActAgent(object):
             path_or_dir="目录" if os.path.isdir(image_path_or_dir) else "路径")
         output = self.agent.run(prompt)
         # print(self.agent.memory.load_memory_variables({}))
-        return output
+        output_dict = {"text": output}
+        if "https://oaidalleapiprodscus.blob.core.windows.net" in output:
+            links = self._find_md_links(output)
+            url = list(links.values())[0]
+            output_dict["image"] = url
+            output_dict["text"] = output.replace(url, "")
+        audio_path_re = re.compile(r"/.+/Real-Gemini/test/outputs/.+\.wav")
+        if audio_path_re.search(output):
+            audio_path = audio_path_re.search(output).group()
+            output_dict["audio"] = audio_path
+            output_dict["text"] = output.replace(audio_path, "")
+        return output_dict
+
+    def _find_md_links(self, md):
+        """ Return dict of links in markdown """
+
+        INLINE_LINK_RE = re.compile(r'\[([^\]]+)\]\(([^)]+)\)')
+        FOOTNOTE_LINK_TEXT_RE = re.compile(r'\[([^\]]+)\]\[(\d+)\]')
+        FOOTNOTE_LINK_URL_RE = re.compile(r'\[(\d+)\]:\s+(\S+)')
+
+        links = dict(INLINE_LINK_RE.findall(md))
+        footnote_links = dict(FOOTNOTE_LINK_TEXT_RE.findall(md))
+        footnote_urls = dict(FOOTNOTE_LINK_URL_RE.findall(md))
+
+        for key, value in footnote_links.items():
+            footnote_links[key] = footnote_urls[value]
+        links.update(footnote_links)
+        print(links)
+        return links

@@ -1,20 +1,32 @@
+import os
+import sys
 import uuid
+import shutil
 import streamlit as st
 from pathlib import Path
-from utils_st.audio2text import audio2text_from_bytes
-from utils_st.extracte_img import get_main_img
-from utils_st.get_gpt4v_response import gpt4v,gpt4v_client
-from utils_st.text2audio import text2audio,autoplay_audio
-from utils_st.record_video import record
 from queue import Queue
 import time
 import cv2
 from threading import Thread,Event
 
+import traceback
+
+from .utils_st.audio2text import audio2text_from_bytes
+from .utils_st.extracte_img import get_main_img
+from .utils_st.text2audio import text2audio,autoplay_audio
+from .utils_st.record_video import record
+
 # 设置事件锁
 event_record = Event()
 event_chat = Event()
 event_record.set() # 初始打开录音锁
+
+# 图片缓存路径
+IMAGE_BUFFER_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "img_buf")
+
+# 初始化agent
+from real_gemini.agent import ReActAgent
+gemini_agent = ReActAgent()
 
 with st.sidebar:
     with st.form('参数配置'):
@@ -81,6 +93,14 @@ def show_chat_message_from_history(show_num_history=None):
             except:
                 pass
 
+def save_buf_image(imgs):
+    if os.path.exists(IMAGE_BUFFER_DIR):
+        shutil.rmtree(IMAGE_BUFFER_DIR)
+    os.makedirs(IMAGE_BUFFER_DIR)
+    for idx, img in enumerate(imgs):
+        filename = os.path.join(IMAGE_BUFFER_DIR, f"image_{idx}.png")
+        cv2.imwrite(filename, img)
+
 def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
     """
     prompt：输入的文本
@@ -97,8 +117,11 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
             st.session_state.messages.append({"role": "user", "content": prompt})
         # Display assistant response in chat message container
         with st.chat_message("assistant",avatar='./source/bot.png'):
-            res = gpt4v_client(query=prompt,imgs=imgs)
-            print('res[text]:',res['text'])
+            # print("imgs:", imgs)
+            save_buf_image(imgs)
+            # res = gpt4v_client(query=prompt,imgs=imgs)
+            res = gemini_agent.run(prompt=prompt, image_path_or_dir=IMAGE_BUFFER_DIR)
+            print('res:',res)
             if audio_response:
                 sound,rate,byte_sound_array = text2audio(res["text"])
             else:
@@ -109,18 +132,27 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
                 # 不自动播放语音
                 st.audio(sound,sample_rate=rate)
             st.markdown(res['text'])
+            # 如果有图片的话
             try:
-                st.image(res['imgs'])
+                st.image(res['image'])
+                # time.sleep(10)
             except:
                 pass
             # 由于是自动播放音频，需要等待音频播放完毕
             if autoplay:
                 time.sleep(int(len(sound)/rate)+1)
+            # 如果有音频的话
+            try:
+                st.audio(res['audio'])
+                # time.sleep(10)
+            except:
+                traceback.print_exc()
+                pass
             st.session_state.messages.append({"role": "assistant", "content": res['text'],'audio':sound})
 
 
-if __name__ == '__main__':
-    max_round=max_chat_turn+50 # 为了保证安全，没有写没条件的while循环
+def launch():
+    max_round = max_chat_turn + 50 # 为了保证安全，没有写没条件的while循环
     record_thread = Thread(target=my_recorder)
     # 展示录像设备的图像信息
     video_show = st.container()
@@ -156,8 +188,8 @@ if __name__ == '__main__':
                 status.update(label="输入信号处理完成", state="complete", expanded=False)
             with chat_placeholder.container():# 1.30支持设置 height=300px
                 # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
-                # show_chat_message_from_history() # 现在关闭展示历史，只展示单轮
-                response(prompt=input_text, imgs=imgs, autoplay=True, audio_response=True)
+                show_chat_message_from_history()
+                response(prompt=input_text,imgs=imgs,autoplay=True,audio_response=True)
                 print('对话完毕，释放录音锁，打开对话锁')
                 # 对话响应完毕，打开事件
                 event_record.set()
