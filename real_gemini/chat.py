@@ -178,10 +178,10 @@ def launch():
             with placeholder.status('处理输入信号...',state='running',expanded=True) as status:
                 if len(imgs)>0:
                     st.write('getMainFrame...')
-                    imgs = get_main_img(imgs)
-                    imgs = imgs[-3:]
-                    cls = st.columns(min(3,len(imgs)))
-                    for idx,cl in enumerate(cls):
+                    imgs = get_main_img(imgs, 3)
+                    # imgs = imgs[-3:]
+                    cls = st.columns(min(3, len(imgs)))
+                    for idx, cl in enumerate(cls):
                         cl.image(cv2.cvtColor(imgs[idx], cv2.COLOR_BGR2RGB))
                 st.audio(audio.get_wav_data())
                 st.text(f'识别后的文本：{input_text}')
