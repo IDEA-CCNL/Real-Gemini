@@ -13,64 +13,35 @@ from .tools.music_tool import Text2MusicTool
 from .tools.controlnet_tool import Image2PoseTool
 from .tools.sam_tool import SegmentingTool
 from .tools.dino_tool import Text2BoxTool
-from .tools.imageediting_tool import ImageEditingTool
+from .tools.imageediting_tool import ImageRemoveTool, ImageReplaceTool
 from .utils.agent_prompt import PREFIX, FORMAT_INSTRUCTIONS, SUFFIX
+
+REGISTERED_TOOL_CLASSES = [
+    GPT4VTool,
+    Text2MusicTool,
+    SegmentingTool,
+    Image2PoseTool,
+    Text2BoxTool,
+    ImageRemoveTool,
+    ImageReplaceTool,
+]
 
 class ReActAgent(object):
 
     def __init__(self):
         self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
         # self.llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
-        gpt4v = GPT4VTool()
-        # weather_tool = WeatherTool()
-        music_tool = Text2MusicTool()
-        self.tools = [
-            Tool(
-              name=gpt4v._name_,
-              description=gpt4v._description_,
-              func=gpt4v.inference,
-            ),
-            # Tool(
-            #     name=weather_tool._name_,
-            #     description=weather_tool._description_,
-            #     func=weather_tool.inference,
-            # ),
-            Tool(
-                name=music_tool._name_,
-                description=music_tool._description_,
-                func=music_tool.inference,
+        self.tools = load_tools(["dalle-image-generator"])
+        for tool_cls in REGISTERED_TOOL_CLASSES:
+            custom_tool = tool_cls()
+            self.tools.append(
+                Tool(
+                    name=custom_tool._name_,
+                    description=custom_tool._description_,
+                    func=custom_tool.inference,
+                    return_direct=custom_tool._return_direct_
+                )
             )
-        ]
-        self.tools.extend(load_tools(["dalle-image-generator"]))
-        sam = SegmentingTool()
-        self.tools.append(Tool(
-                name=sam._name_,
-                description=sam._description_,
-                func=sam.inference,
-        ))
-        controlnet = Image2PoseTool()
-        self.tools.append(Tool(
-                name=controlnet._name_,
-                description=controlnet._description_,
-                func=controlnet.inference,
-        ))
-        dino = Text2BoxTool()
-        self.tools.append(Tool(
-                name=dino._name_,
-                description=dino._description_,
-                func=dino.inference,
-        ))
-        image_editing = ImageEditingTool()
-        self.tools.append(Tool(
-                name=image_editing._remove_name_,
-                description=image_editing._remove_description_,
-                func=image_editing.inference_remove,
-        ))
-        self.tools.append(Tool(
-                name=image_editing._replace_name_, 
-                description=image_editing._replace_description_,
-                func=image_editing.inference_replace_sam,
-        ))
 
         memory = ConversationBufferMemory(
             return_messages=True,

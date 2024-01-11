@@ -7,6 +7,7 @@ class Image2PoseTool(object):
                 useful when you want to detect the human pose of the image. 
                 like: generate human poses of this image, or generate a pose image from this image.
                 The input to this tool should be a string, representing the image_dir or image_paths."""
+    _return_direct_ = False
     
     def __init__(self):
         self.host = "0.0.0.0"

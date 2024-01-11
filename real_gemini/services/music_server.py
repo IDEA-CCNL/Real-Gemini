@@ -3,10 +3,10 @@
 import os
 import io
 import sys
-import argparse
 import uvicorn
 from pathlib import Path
-from fastapi import FastAPI, UploadFile, File, Form
+from dotenv import load_dotenv
+from fastapi import FastAPI, Form
 from fastapi.responses import Response, StreamingResponse
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -27,15 +27,18 @@ text2music_model = None
 async def text_to_music(text: str = Form(...)):
     output = text2music_model(text)
     # return AudioResponse(output)
-    return {"wav_file_path": output}
+    return {"audio": output}
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Audio API")
-    parser.add_argument("--host", type=str, default="localhost", help="Host")
-    parser.add_argument("--port", type=int, default=6678, help="Port")
-    parser.add_argument("--model_path", type=str, required=True)
-    args = parser.parse_args()
+    work_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    env_file = os.path.join(work_dir, ".env")
+    load_dotenv(dotenv_path=env_file)
 
-    text2music_model = Text2MusicModel(model_path=args.model_path, device="cuda")
+    
+    text2music_model = Text2MusicModel(model_path=os.getenv("MUSIC_MODEL_PATH"), device="cuda")
 
-    uvicorn.run(app, host=args.host, port=args.port)
+    uvicorn.run(
+        app,
+        host=os.getenv("MUSIC_SERVER_HOST"),
+        port=int(os.getenv("MUSIC_SERVER_PORT"))
+    )

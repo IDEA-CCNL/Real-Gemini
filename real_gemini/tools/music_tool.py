@@ -9,13 +9,14 @@ from langchain_core.messages import HumanMessage, SystemMessage
 class Text2MusicTool(object):
     _name_ = "Text2Music"
     _description_ = "这个工具是从文本生成音乐的调用接口，它可以根据一段文字，生成符合这段文字内容的音乐风格。本工具的输入是一段文本指令。This tool is an API that generates music from text. It can create music that matches the style of the given text content. The input for this tool is a text command."
+    _return_direct_ = True
 
     def __init__(self):
         self.translator = ChatOpenAI(
             model="gpt-3.5-turbo",
             max_tokens=256)
-        self.host = "0.0.0.0"
-        self.port = 6678
+        self.host = os.getenv("MUSIC_SERVER_HOST")
+        self.port = os.getenv("MUSIC_SERVER_PORT")
     
     def inference(self, input_str: str):
         messages = []
