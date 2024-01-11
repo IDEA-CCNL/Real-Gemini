@@ -2,6 +2,7 @@
 
 import os
 import re
+import json
 from langchain.chat_models import ChatOpenAI
 from langchain.agents.tools import Tool
 from langchain.agents import initialize_agent, load_tools, AgentType
@@ -67,17 +68,16 @@ class ReActAgent(object):
             path_or_dir="目录" if os.path.isdir(image_path_or_dir) else "路径")
         output = self.agent.run(prompt)
         # print(self.agent.memory.load_memory_variables({}))
-        output_dict = {"text": output}
+        try:
+            output_dict = json.loads(output)
+        except:
+            output_dict = {"text": output}
         if "https://oaidalleapiprodscus.blob.core.windows.net" in output:
             links = self._find_md_links(output)
             url = list(links.values())[0]
             output_dict["image"] = url
             output_dict["text"] = output.replace(url, "")
-        audio_path_re = re.compile(r"/.+/Real-Gemini/test/outputs/.+\.wav")
-        if audio_path_re.search(output):
-            audio_path = audio_path_re.search(output).group()
-            output_dict["audio"] = audio_path
-            output_dict["text"] = output.replace(audio_path, "")
+        
         return output_dict
 
     def _find_md_links(self, md):

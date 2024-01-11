@@ -116,12 +116,12 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
         # Add user message to chat history
             st.session_state.messages.append({"role": "user", "content": prompt})
         # Display assistant response in chat message container
-        with st.chat_message("assistant",avatar='./source/bot.png'):
+        with st.chat_message("assistant", avatar='./source/bot.png'):
             # print("imgs:", imgs)
             save_buf_image(imgs)
             # res = gpt4v_client(query=prompt,imgs=imgs)
             res = gemini_agent.run(prompt=prompt, image_path_or_dir=IMAGE_BUFFER_DIR)
-            print('res:',res)
+            print('res:', res)
             if audio_response:
                 sound,rate,byte_sound_array = text2audio(res["text"])
             else:
@@ -130,7 +130,7 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
                 autoplay_audio(byte_sound_array)
             if not autoplay and audio_response:
                 # 不自动播放语音
-                st.audio(sound,sample_rate=rate)
+                st.audio(sound, sample_rate=rate)
             st.markdown(res['text'])
             # 如果有图片的话
             try:
@@ -142,12 +142,12 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
             if autoplay:
                 time.sleep(int(len(sound)/rate)+1)
             # 如果有音频的话
-            try:
-                st.audio(res['audio'])
-                # time.sleep(10)
-            except:
-                traceback.print_exc()
-                pass
+            if "audio" in res:
+                if autoplay:
+                    autoplay_audio(res["audio"])
+                    time.sleep(10)
+                else:
+                    st.audio(res['audio'])
             st.session_state.messages.append({"role": "assistant", "content": res['text'],'audio':sound})
 
 
