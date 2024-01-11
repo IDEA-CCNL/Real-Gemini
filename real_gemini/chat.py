@@ -133,11 +133,8 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
                 st.audio(sound, sample_rate=rate)
             st.markdown(res['text'])
             # 如果有图片的话
-            try:
+            if "image" in res:
                 st.image(res['image'])
-                # time.sleep(10)
-            except:
-                pass
             # 由于是自动播放音频，需要等待音频播放完毕
             if autoplay:
                 time.sleep(int(len(sound)/rate)+1)
