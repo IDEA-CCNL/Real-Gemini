@@ -10,6 +10,7 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 
 from .tools.gpt4v_tool import GPT4VTool
+from .tools.image_generation_tool import TaiyiGeneralTool
 from .tools.music_tool import Text2MusicTool
 from .tools.controlnet_tool import Image2PoseTool
 from .tools.sam_tool import SegmentingTool
@@ -19,6 +20,7 @@ from .utils.agent_prompt import PREFIX, FORMAT_INSTRUCTIONS, SUFFIX
 
 REGISTERED_TOOL_CLASSES = [
     GPT4VTool,
+    TaiyiGeneralTool,
     Text2MusicTool,
     SegmentingTool,
     Image2PoseTool,
@@ -32,7 +34,8 @@ class ReActAgent(object):
     def __init__(self):
         self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
         # self.llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
-        self.tools = load_tools(["dalle-image-generator"])
+        # self.tools = load_tools(["dalle-image-generator"])
+        self.tools = []
         for tool_cls in REGISTERED_TOOL_CLASSES:
             custom_tool = tool_cls()
             self.tools.append(
