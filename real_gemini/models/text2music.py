@@ -1,9 +1,9 @@
 #encoding=utf8
 
 import os
-import io
 import torch
 import scipy
+import base64
 import hashlib
 import numpy as np
 from transformers import (
@@ -28,22 +28,11 @@ class Text2MusicModel(object):
             return_tensors="pt",
         ).to(self.device)
         audio_values = self.model.generate(**inputs, max_new_tokens=512)
-
-        # write to file
-        # stream = io.BytesIO()
-        save_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        save_dir = os.path.join(save_dir, "test", "outputs")
-        md5 = hashlib.md5()
-        md5.update(text.encode('utf-8'))
-        filename = os.path.join(save_dir, md5.hexdigest() + ".wav")
+        
+        data = audio_values[0, 0].cpu().numpy().astype(np.float32)
         sampling_rate = self.model.config.audio_encoder.sampling_rate
-        scipy.io.wavfile.write(
-            filename,
-            rate=sampling_rate,
-            data=audio_values[0, 0].cpu().numpy().astype(np.float32),
-        )
-        # stream.seek(0)
-        return filename
+        raw_data = base64.b64encode(data.tobytes())
+        return raw_data, sampling_rate
 
     def to(self, device):
         self.device = device

@@ -2,7 +2,11 @@
 
 import os
 import json
+import scipy
+import base64
+import hashlib
 import requests
+import numpy as np
 from langchain.chat_models import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
@@ -36,4 +40,23 @@ class Text2MusicTool(object):
         url = f"http://{self.host}:{self.port}/text_to_music"
         data = {"text": input_str_en}
         music_response = requests.post(url, data=data)
-        return music_response.text
+        music_response = music_response.json()
+
+        # write to file
+        save_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        save_dir = os.path.join(save_dir, "test", "outputs")
+        md5 = hashlib.md5()
+        md5.update(input_str_en.encode('utf-8'))
+        filename = os.path.join(save_dir, md5.hexdigest() + ".wav")
+        
+        raw_data = music_response["audio"]
+        sampling_rate = music_response["sampling_rate"]
+        scipy.io.wavfile.write(
+            filename,
+            rate=sampling_rate,
+            data=np.frombuffer(base64.b64decode(raw_data), np.float32),
+        )
+        print("music filename:", filename)
+
+        result = {"text": "好的，为你生成了一段音乐。", "audio": filename}
+        return json.dumps(result, ensure_ascii=False)

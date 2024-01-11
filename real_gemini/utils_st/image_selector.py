@@ -1,18 +1,13 @@
 from __future__ import print_function
 
-import os
-from glob import glob
-import tempfile
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 from skimage.filters.rank import entropy
 from skimage.morphology import disk
-from skimage import img_as_float
 import itertools  
-import time
 from multiprocessing import Pool
-import utils_st.image_config as config
+from . import image_config as config
 
 
 class ImageSelector(object):

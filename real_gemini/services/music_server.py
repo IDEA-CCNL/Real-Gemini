@@ -25,9 +25,9 @@ text2music_model = None
 
 @app.post("/text_to_music")
 async def text_to_music(text: str = Form(...)):
-    output = text2music_model(text)
+    raw_data, sampling_rate = text2music_model(text)
     # return AudioResponse(output)
-    return {"audio": output}
+    return {"audio": raw_data, "sampling_rate": sampling_rate}
 
 if __name__ == "__main__":
     work_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
