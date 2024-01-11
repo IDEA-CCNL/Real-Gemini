@@ -2,7 +2,7 @@ import base64
 import json
 import requests
 import numpy as np
-from utils_st.image_selector import ImageSelector
+from .image_selector import ImageSelector
 
 def get_main_img(imgs, num_frames):
     # resp = requests.post(

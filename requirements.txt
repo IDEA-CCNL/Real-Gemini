@@ -84,3 +84,5 @@ opencv_python
 streamlit
 SpeechRecognition
 python-dotenv
+scikit-learn
+scikit-image
