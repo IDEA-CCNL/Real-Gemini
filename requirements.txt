@@ -86,3 +86,4 @@ SpeechRecognition
 python-dotenv
 scikit-learn
 scikit-image
+controlnet_aux
