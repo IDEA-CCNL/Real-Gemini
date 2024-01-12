@@ -16,6 +16,7 @@ from .tools.controlnet_tool import Image2PoseTool
 from .tools.sam_tool import SegmentingTool
 from .tools.dino_tool import Text2BoxTool
 from .tools.imageediting_tool import ImageRemoveTool, ImageReplaceTool
+from .tools.weather_tool import WeatherTool
 from .utils.agent_prompt import PREFIX, FORMAT_INSTRUCTIONS, SUFFIX
 
 REGISTERED_TOOL_CLASSES = [
@@ -27,6 +28,7 @@ REGISTERED_TOOL_CLASSES = [
     Text2BoxTool,
     ImageRemoveTool,
     ImageReplaceTool,
+    WeatherTool,
 ]
 
 class ReActAgent(object):
