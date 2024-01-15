@@ -87,3 +87,7 @@ python-dotenv
 scikit-learn
 scikit-image
 controlnet_aux
+torch
+torchaudio
+TTS
+langid
