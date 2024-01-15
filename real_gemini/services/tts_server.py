@@ -22,16 +22,6 @@ tts_model = None
 async def tts(prompt: str = Form(...)):
     wav, sample_rate = tts_model(prompt)
     wav = base64.b64encode(wav.tobytes())
-    # print(out["wav"].numpy().dtype)
-    # # print(ret_wav)
-    # import numpy
-    # wav = numpy.frombuffer(base64.b64decode(ret_wav), dtype=numpy.float32)
-    # wav = torch.tensor(wav).unsqueeze(dim=0)
-    # print("wav:", wav)
-    # # Generate a random UUID for use as a filename
-    # random_uuid_for_filename = uuid.uuid4()
-    # file_path=f"{output_wav_dir}/{random_uuid_for_filename}.wav"
-    # torchaudio.save(file_path, wav, 24000)
     return {"audio": wav, "sample_rate": sample_rate}
 
 if __name__ == "__main__":

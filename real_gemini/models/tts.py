@@ -38,7 +38,6 @@ class TTSModel(object):
         )
         out["wav"] = torch.tensor(out["wav"]).unsqueeze(0)
         return out["wav"].numpy(), self.sample_rate
-        ret_wav = base64.b64encode(out["wav"].numpy().tobytes())
         # print(out["wav"].numpy().dtype)
         # # print(ret_wav)
         # import numpy
