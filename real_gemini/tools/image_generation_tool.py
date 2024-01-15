@@ -26,6 +26,8 @@ class TaiyiGeneralTool(object):
         # write to file
         save_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         save_dir = os.path.join(save_dir, "test", "outputs")
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
         md5 = hashlib.md5()
         md5.update(inputs.encode('utf-8'))
         filename = os.path.join(save_dir, md5.hexdigest() + ".png")

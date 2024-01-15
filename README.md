@@ -27,11 +27,14 @@ cp .env.template .env
 然后填写对应的环境变量。
 
 ## 启动后端模型服务
-你可以在有GPU的后端环境中启动服务，例如启动Text2Music的服务。
+你可以在有GPU的后端环境中启动服务，例如启动TTS的服务。
 
 ```bash
-sh scripts/start_music_server.sh
+sh scripts/start_tts_server.sh
 ```
+
+必须要启动的服务有：
+- TTS
 
 ## 启动前端对话服务
 
@@ -45,15 +48,9 @@ sh run.sh
 
 请注意，若前端环境是MacOS，请不要使用第三方的Terminial启动服务。
 
-## TTS和ASR服务
+## ASR服务
 - ASR
 服务调用自内部自建工具（TODO：更新一个服务并开源）
-- TTS
-见[tts.py](./real_gemini/tts.py)，启动脚本：
-```shell
-python tts.py
-```
-启动这些服务需要一些额外的环境和模型：`torch, torchaudio, TTS`，用`pip`安装即可，模型文件路径见py脚本。
 
 ## Acknowledgement
 - [Fastapi](https://github.com/tiangolo/fastapi)

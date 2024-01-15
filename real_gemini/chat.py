@@ -1,9 +1,7 @@
 import os
 import sys
-import uuid
 import shutil
 import streamlit as st
-from pathlib import Path
 from queue import Queue
 import time
 import cv2
@@ -12,7 +10,7 @@ from threading import Thread,Event
 from .tools.tts_tool import TTSTool
 from .utils_st.audio2text import audio2text_from_bytes
 from .utils_st.extracte_img import get_main_img
-from .utils_st.text2audio import text2audio,autoplay_audio
+from .utils_st.text2audio import autoplay_audio
 from .utils_st.record_video import record
 
 # 设置事件锁
@@ -122,7 +120,6 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
             res = gemini_agent.run(prompt=prompt, image_path_or_dir=IMAGE_BUFFER_DIR)
             print('res:', res)
             if audio_response:
-                # sound,rate,byte_sound_array = text2audio(res["text"])
                 tts_tool = TTSTool()
                 sound, rate, byte_sound_array = tts_tool.inference(res["text"])
             else:
