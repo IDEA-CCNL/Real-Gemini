@@ -173,7 +173,7 @@ def launch():
             print('进入对话响应，暂停录入')
             imgs,audio,input_text = q.get()
             with placeholder.status('处理输入信号...',state='running',expanded=True) as status:
-                if len(imgs)>0:
+                if len(imgs) > 0:
                     st.write('getMainFrame...')
                     imgs = get_main_img(imgs, 3)
                     # imgs = imgs[-3:]
@@ -183,14 +183,15 @@ def launch():
                 st.audio(audio.get_wav_data())
                 st.text(f'识别后的文本：{input_text}')
                 status.update(label="输入信号处理完成", state="complete", expanded=False)
-            with chat_placeholder.container():# 1.30支持设置 height=300px
-                # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
-                show_chat_message_from_history()
-                response(prompt=input_text,imgs=imgs,autoplay=True,audio_response=True)
-                print('对话完毕，释放录音锁，打开对话锁')
-                # 对话响应完毕，打开事件
-                event_record.set()
-                # 如果没有录入输入，等待
-                event_chat.clear()
-            chat_placeholder.empty()
+            with st.spinner("我在玩命地跑Agent呢..."):
+                with chat_placeholder.container():# 1.30支持设置 height=300px
+                    # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
+                    show_chat_message_from_history()
+                    response(prompt=input_text,imgs=imgs,autoplay=True,audio_response=True)
+                    print('对话完毕，释放录音锁，打开对话锁')
+                    # 对话响应完毕，打开事件
+                    event_record.set()
+                    # 如果没有录入输入，等待
+                    event_chat.clear()
+                chat_placeholder.empty()
     print('达到最大对话轮数，结束程序！')
