@@ -1,6 +1,7 @@
 import base64
 import json
 import io
+import scipy
 import requests
 import numpy as np
 import streamlit as st
@@ -23,7 +24,7 @@ def text2audio(text,):
     res = response.json()
     audio_array = np.frombuffer(base64.b64decode(res[0]),np.float32)
     rate = res[1]
-    return audio_array,rate,convert_to_wav_bytes(audio_array,rate)
+    return audio_array, rate, convert_to_wav_bytes(audio_array,rate)
 
 def _validate_and_normalize(data: "npt.NDArray[Any]") -> Tuple[bytes, int]:
     """Validates and normalizes numpy array data.
@@ -103,9 +104,10 @@ def convert_to_wav_bytes(
 
 def autoplay_audio(bytes_audio):
     # https://discuss.streamlit.io/t/how-to-play-an-audio-file-automatically-generated-using-text-to-speech-in-streamlit/33201/6
-    if isinstance(bytes_audio,str):
-        with open(bytes_audio,'rb') as f:
-            b64_audio = f.read()
+    if isinstance(bytes_audio, str): # a filename
+        rate, b64_audio = scipy.io.wavfile.read(bytes_audio)
+        b64_audio = convert_to_wav_bytes(b64_audio, rate)
+        b64_audio = base64.b64encode(b64_audio).decode()
     else:
         b64_audio = base64.b64encode(bytes_audio).decode()
     md = f"""
@@ -119,9 +121,11 @@ def autoplay_audio(bytes_audio):
     )
 
 if __name__ == '__main__':
-    with open('/Users/wuziwei/git_project/Real-Gemini/records/180367f8-85d3-4ec3-81dc-95e9c095b7ec_input_audio.mp3','rb') as f:
-        ba = f.read()
-        # print(ba)
-    a,r,ba = text2audio('你好')
-    autoplay_audio(ba)
-    st.audio(a,sample_rate=r)
+    # with open('/Users/wuziwei/git_project/Real-Gemini/records/180367f8-85d3-4ec3-81dc-95e9c095b7ec_input_audio.mp3','rb') as f:
+    #     ba = f.read()
+    #     # print(ba)
+    # a,r,ba = text2audio('你好')
+    # autoplay_audio(ba)
+    # st.audio(a,sample_rate=r)
+    autoplay_audio("/cognitive_comp/pankunhao/code/Real-Gemini/test/outputs/97c1d775af2ad58288ff3baea49914c9.wav")
+    # st.audio("/cognitive_comp/pankunhao/code/Real-Gemini/test/outputs/97c1d775af2ad58288ff3baea49914c9.wav")

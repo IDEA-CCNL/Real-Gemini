@@ -78,7 +78,16 @@ tzlocal==5.2
 urllib3==2.1.0
 validators==0.22.0
 zipp==3.17.0
+langchain
 openai
 opencv_python
 streamlit
 SpeechRecognition
+python-dotenv
+scikit-learn
+scikit-image
+controlnet_aux
+torch
+torchaudio
+TTS
+langid

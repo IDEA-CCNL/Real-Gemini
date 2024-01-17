@@ -8,6 +8,7 @@ class SegmentingTool(object):
                 or perform segmentation on this image, "
                 or segment all the object in this image."
                 The input to this tool should be a string, representing the image_dir or image_paths."""
+    _return_direct_ = False
     
     def __init__(self):
         # self.host = "localhost"

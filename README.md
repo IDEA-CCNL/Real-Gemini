@@ -1,28 +1,56 @@
 # Real-Gemini
 
-Real-time video understanding and interaction through text,audio,image and video with large multi-modal model.
+Real-time video understanding and interaction through text, audio, image and video with large multi-modal model.
 
 利用多模态大模型的实时视频理解和交互框架，通过文本、语音、图像和视频和这是世界进行问答和交流。
 
+## 环境配置
+
+首先需要根据`requirements.txt`安装相关的python包。
+
+```bash
+pip install -r requirements.txt
+```
+
+在前端环境，同时要安装pyaudio。
+
+```bash
+sh install pyaudio.sh
+```
+
+你需要设置一些环境变量。首先，将`.env.template`复制到同目录下的`.env`。
+
+```bash
+cp .env.template .env
+```
+
+然后填写对应的环境变量。
+
+## 启动后端模型服务
+你可以在有GPU的后端环境中启动服务，例如启动TTS的服务。
+
+```bash
+sh scripts/start_tts_server.sh
+```
+
+必须要启动的服务有：
+- TTS
+
 ## 启动前端对话服务
-主要实现了下面2个功能
 
-- 1、streamlit对话界面
-- 2、gpt4v请求接口
+主要实现使用streamlit实现了前端界面。
 
-打开`run.sh`输入自己的api key, 然后启动
+然后启动前端：
+
 ```shell
 sh run.sh
 ```
-## TTS和ASR服务
+
+请注意，若前端环境是MacOS，请不要使用第三方的Terminial启动服务。
+
+## ASR服务
 - ASR
-服务调用自S组（TODO：要不要更新一个服务在这里）
-- TTS
-见[tts.py](./real_gemini/tts.py)，启动脚本：
-```shell
-python tts.py
-```
-启动这些服务需要一些额外的环境和模型：`torch, torchaudio, TTS`，用`pip`安装即可，模型文件路径见py脚本。
+服务调用自内部自建工具（TODO：更新一个服务并开源）
 
 ## Acknowledgement
 - [Fastapi](https://github.com/tiangolo/fastapi)

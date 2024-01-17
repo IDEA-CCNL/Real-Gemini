@@ -6,6 +6,7 @@ class Text2BoxTool(object):
                 useful when you only want to detect or find out given objects in the picture
                 The input to this tool should be a comma separated string of two,
                 representing the image_dir or image_paths and the object to be detected, respectively."""
+    _return_direct_ = False
     
     def __init__(self):
         self.host = "0.0.0.0"
