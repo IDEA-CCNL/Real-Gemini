@@ -66,7 +66,7 @@ class ReActAgent(object):
 
     def run(self, prompt: str, image_path_or_dir: str):
         prompt_template = PromptTemplate.from_template(
-            "这个{path_or_dir}下的图片是AI多模态助手的关键帧图片，请根据这些图片回答我的问题，请注意，图片和问题可能是没有关联的，你需要自己进行判断。\n图片{path_or_dir}：{image}\n问题：{prompt}"
+            "这个{path_or_dir}下的图片是AI多模态助手的截取的关键帧图片，请根据这些图片回答我的问题，请注意，图片和问题可能是没有关联的，你需要自己进行判断。\n图片{path_or_dir}：{image}\n问题：{prompt}。\n\n由于你输入的文字是由ASR服务得到的，所以可能存在一些识别噪音。假如你的输入是一些没有意义的文字或者不通顺的句子时，请不要调用工具，并直接返回\"###\"。"
         )
         prompt = prompt_template.format(
             prompt=prompt, image=image_path_or_dir,

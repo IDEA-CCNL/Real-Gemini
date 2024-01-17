@@ -1,18 +1,15 @@
 import os
-import sys
-import uuid
 import shutil
 import streamlit as st
-from pathlib import Path
 from queue import Queue
 import time
 import cv2
-from threading import Thread,Event
+from threading import Thread, Event
 
 from .tools.tts_tool import TTSTool
 from .utils_st.audio2text import audio2text_from_bytes
 from .utils_st.extracte_img import get_main_img
-from .utils_st.text2audio import text2audio,autoplay_audio
+from .utils_st.text2audio import autoplay_audio
 from .utils_st.record_video import record
 
 # 设置事件锁
@@ -29,7 +26,7 @@ gemini_agent = ReActAgent()
 
 with st.sidebar:
     with st.form('参数配置'):
-        max_chat_turn = st.slider('最大对话轮数:',min_value=1,max_value=10000,value=10)
+        max_chat_turn = st.slider('最大对话轮数:', min_value=1, max_value=10000, value=10)
         st.form_submit_button('提交配置')
 max_record_round = 2*max_chat_turn
 q = Queue(max_record_round)
@@ -56,7 +53,7 @@ def my_recorder():
         print('holding to record')
         event_record.wait()
         print(f'record {i}')
-        imgs,audio = record()
+        imgs, audio = record()
         input_text,code_status,request_id = audio2text_from_bytes(audio.get_wav_data())
         if input_text and len(input_text)>5:
             q.put((imgs,audio,input_text))
@@ -100,7 +97,7 @@ def save_buf_image(imgs):
         filename = os.path.join(IMAGE_BUFFER_DIR, f"image_{idx}.png")
         cv2.imwrite(filename, img)
 
-def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
+def response(prompt=None, imgs=None, autoplay=True, audio_response=True):
     """
     prompt：输入的文本
     imgs：输入的图片
@@ -122,7 +119,6 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
             res = gemini_agent.run(prompt=prompt, image_path_or_dir=IMAGE_BUFFER_DIR)
             print('res:', res)
             if audio_response:
-                # sound,rate,byte_sound_array = text2audio(res["text"])
                 tts_tool = TTSTool()
                 sound, rate, byte_sound_array = tts_tool.inference(res["text"])
             else:
@@ -133,6 +129,8 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
                 # 不自动播放语音
                 st.audio(sound, sample_rate=rate)
             st.markdown(res['text'])
+            if res["text"] == "###":
+                st.warning("无效的语音输入，请重试。", icon="🤖")
             # 如果有图片的话
             if "image" in res:
                 st.image(res['image'])
@@ -146,7 +144,8 @@ def response(prompt=None,imgs=None,autoplay=True,audio_response=True):
                     time.sleep(10)
                 else:
                     st.audio(res['audio'])
-            st.session_state.messages.append({"role": "assistant", "content": res['text'],'audio':sound})
+            st.session_state.messages.append(
+                {"role": "assistant", "content": res['text'],'audio':sound})
 
 
 def launch():
@@ -154,7 +153,7 @@ def launch():
     record_thread = Thread(target=my_recorder)
     # 展示录像设备的图像信息
     video_show = st.container()
-    video_show.camera_input('tt',label_visibility='hidden')
+    video_show.camera_input('tt', label_visibility='hidden')
     # 开始录入输入
     if video_show.button('开始对话'):
         record_thread.start()

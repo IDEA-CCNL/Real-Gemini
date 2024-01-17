@@ -34,6 +34,7 @@ Thought: Do I need to use a tool? No
 
 MAKE SURE your response MUST in Chinese.
 
+Since the text you input is obtained from the ASR service, there may be some recognition noise. If your input is some meaningless text or incoherent sentences, please do not call the tool and directly return "###".
 """
 
 SUFFIX = """Begin!
