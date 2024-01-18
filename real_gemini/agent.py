@@ -73,6 +73,7 @@ class ReActAgent(object):
             path_or_dir="目录" if os.path.isdir(image_path_or_dir) else "路径")
         output = self.agent.run(prompt)
         # print(self.agent.memory.load_memory_variables({}))
+        print("output:", output)
         try:
             output_dict = json.loads(output)
         except:
