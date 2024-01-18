@@ -10,7 +10,7 @@ from real_gemini.agent import ReActAgent
 
 if __name__ == '__main__':
     # arguments containing: config_path, ckpt_path, max_length
-    args_parser = argparse.ArgumentParser("test gpt4v for langchain tools")
+    args_parser = argparse.ArgumentParser("test agent")
     args_parser.add_argument("--prompt", type=str, help="prompt string", required=True)
     args_parser.add_argument("--image_path_or_dir", type=str, help="image path or dir", required=True)
     args = args_parser.parse_args()

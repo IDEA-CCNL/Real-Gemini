@@ -58,7 +58,8 @@ def my_recorder():
         if input_text and len(input_text)>5:
             q.put((imgs,audio,input_text))
         else:
-            print(f'非预期输入: id--{request_id},status--{code_status},text--{input_text}')
+            print(f'非预期输入: id--{request_id}, status--{code_status}, text--{input_text}')
+            st.toast("无效的语音输入，请重试。", icon="🤖")
             time.sleep(2)# 给2秒时间，调整准备输入
             continue
         print(f'{i}录制结束，{q.qsize()}')
@@ -76,18 +77,12 @@ def show_chat_message_from_history(show_num_history=None):
     else:
         history = st.session_state.messages[show_num_history:]
     for message in history:
-        with st.chat_message(message["role"],avatar=img[message['role']]):
-            try:
-                if message['audio'] is not None:
-                    st.audio(message['audio'],sample_rate=24000)
-            except:
-                pass
+        with st.chat_message(message["role"], avatar=img[message['role']]):
+            if message['audio'] is not None:
+                st.audio(message['audio'], sample_rate=24000)
             st.markdown(message["content"])
-            try:
-                if message['img'] is not None:
-                    st.image(message['img'])
-            except:
-                pass
+            if message['img'] is not None:
+                st.image(message['img'])
 
 def save_buf_image(imgs):
     if os.path.exists(IMAGE_BUFFER_DIR):
@@ -130,7 +125,7 @@ def response(prompt=None, imgs=None, autoplay=True, audio_response=True):
                 st.audio(sound, sample_rate=rate)
             st.markdown(res['text'])
             if res["text"] == "###":
-                st.warning("无效的语音输入，请重试。", icon="🤖")
+                st.toast("无效的语音输入，请重试。", icon="🤖")
             # 如果有图片的话
             if "image" in res:
                 st.image(res['image'])
@@ -145,7 +140,7 @@ def response(prompt=None, imgs=None, autoplay=True, audio_response=True):
                 else:
                     st.audio(res['audio'])
             st.session_state.messages.append(
-                {"role": "assistant", "content": res['text'],'audio':sound})
+                {"role": "assistant", "content": res['text'], 'audio': sound})
 
 
 def launch():
@@ -163,7 +158,7 @@ def launch():
     placeholder = st.empty()
     # 展示对话
     chat_placeholder = st.empty()
-    while max_round>0:
+    while max_round > 0:
         # 等待对话开始，初始化是阻塞，等待第一次输入录入完成，才会打开锁
         print('等待对话开始')
         event_chat.wait()
@@ -172,9 +167,9 @@ def launch():
             # 进入到对话时，停止录入，防止录入播放的音频
             print('进入对话响应，暂停录入')
             imgs,audio,input_text = q.get()
-            with placeholder.status('处理输入信号...',state='running',expanded=True) as status:
+            with placeholder.status('处理输入信号...', state='running', expanded=True) as status:
                 if len(imgs) > 0:
-                    st.write('getMainFrame...')
+                    st.write('获取关键帧...')
                     imgs = get_main_img(imgs, 3)
                     # imgs = imgs[-3:]
                     cls = st.columns(min(3, len(imgs)))
@@ -183,15 +178,14 @@ def launch():
                 st.audio(audio.get_wav_data())
                 st.text(f'识别后的文本：{input_text}')
                 status.update(label="输入信号处理完成", state="complete", expanded=False)
-            with st.spinner("我在玩命地跑Agent呢..."):
-                with chat_placeholder.container():# 1.30支持设置 height=300px
-                    # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
-                    show_chat_message_from_history()
-                    response(prompt=input_text,imgs=imgs,autoplay=True,audio_response=True)
-                    print('对话完毕，释放录音锁，打开对话锁')
-                    # 对话响应完毕，打开事件
-                    event_record.set()
-                    # 如果没有录入输入，等待
-                    event_chat.clear()
-                chat_placeholder.empty()
+            with chat_placeholder.container():# 1.30支持设置 height=300px
+                # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
+                show_chat_message_from_history()
+                response(prompt=input_text, imgs=imgs,autoplay=True, audio_response=True)
+                print('对话完毕，释放录音锁，打开对话锁')
+                # 对话响应完毕，打开事件
+                event_record.set()
+                # 如果没有录入输入，等待
+                event_chat.clear()
+            chat_placeholder.empty()
     print('达到最大对话轮数，结束程序！')
