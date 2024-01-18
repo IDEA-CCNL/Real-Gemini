@@ -17,6 +17,7 @@ from .tools.sam_tool import SegmentingTool
 from .tools.dino_tool import Text2BoxTool
 from .tools.imageediting_tool import ImageRemoveTool, ImageReplaceTool
 from .tools.weather_tool import WeatherTool
+from .utils.output_parser import ConvoOutputParser
 from .utils.agent_prompt import PREFIX, FORMAT_INSTRUCTIONS, SUFFIX
 
 REGISTERED_TOOL_CLASSES = [
@@ -34,8 +35,10 @@ REGISTERED_TOOL_CLASSES = [
 class ReActAgent(object):
 
     def __init__(self):
-        self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
-        # self.llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
+        # self.llm = ChatOpenAI(model_name="gpt-4", temperature=0.5)
+        self.llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.5)
+        # self.llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.5)
+        # self.llm = ChatOpenAI(model_name="deepseek", temperature=0.5, openai_api_base="http://192.168.81.13:6767/v1/")
         # self.tools = load_tools(["dalle-image-generator"])
         self.tools = []
         for tool_cls in REGISTERED_TOOL_CLASSES:
@@ -53,20 +56,28 @@ class ReActAgent(object):
             return_messages=True,
             memory_key="chat_history", output_key='output')
         
+        ai_prefix = "REAL-GEMINI"
+        output_parser = ConvoOutputParser()
+        output_parser.ai_prefix = ai_prefix
+        
         self.agent = initialize_agent(
               tools=self.tools,
               llm=self.llm,
               memory=memory,
               agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
-              prefix=PREFIX,
-              suffix=SUFFIX,
-              format_instructions=FORMAT_INSTRUCTIONS,
+              agent_kwargs={
+                'prefix': PREFIX,
+                'suffix': SUFFIX,
+                'format_instructions': FORMAT_INSTRUCTIONS,
+                'ai_prefix': ai_prefix,
+                'output_parser': output_parser,
+              },
               verbose=True,
         )
 
     def run(self, prompt: str, image_path_or_dir: str):
         prompt_template = PromptTemplate.from_template(
-            "这个{path_or_dir}下的图片是AI多模态助手的截取的关键帧图片，请根据这些图片回答我的问题，请注意，图片和问题可能是没有关联的，你需要自己进行判断。\n图片{path_or_dir}：{image}\n问题：{prompt}。\n\n由于你输入的文字是由ASR服务得到的，所以可能存在一些识别噪音。假如你的输入是一些没有意义的文字或者不通顺的句子时，请不要调用工具，并直接返回\"###\"。"
+            "图片{path_or_dir}：{image}\n问题：{prompt}。"
         )
         prompt = prompt_template.format(
             prompt=prompt, image=image_path_or_dir,
