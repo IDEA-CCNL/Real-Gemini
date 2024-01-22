@@ -11,18 +11,20 @@ from real_gemini.tools.music_tool import Text2MusicTool
 from real_gemini.tools.image_generation_tool import TaiyiGeneralTool
 from real_gemini.tools.weather_tool import WeatherTool
 from real_gemini.tools.tts_tool import TTSTool
+from real_gemini.tools.qwen4v_tool import QWEN4VTool
 
 TOOL_DICT = {
     "music": Text2MusicTool,
     "image": TaiyiGeneralTool,
     "weather": WeatherTool,
     "tts": TTSTool,
+    "qwen4v": QWEN4VTool
 }
 
 if __name__ == '__main__':
     args_parser = argparse.ArgumentParser("test tool")
     args_parser.add_argument("--prompt", type=str, help="prompt string", required=True)
-    args_parser.add_argument("--tool", type=str, help="tool name", required=True, choices=["music", "image", "weather", "tts"])
+    args_parser.add_argument("--tool", type=str, help="tool name", required=True, choices=["music", "image", "weather", "tts", "qwen4v"])
     args = args_parser.parse_args()
 
     work_dir = os.path.dirname(os.path.dirname(__file__))

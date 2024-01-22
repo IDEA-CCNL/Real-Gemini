@@ -1,5 +1,8 @@
 from __future__ import print_function
 
+import os
+from glob import glob
+import tempfile
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans

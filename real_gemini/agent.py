@@ -17,6 +17,7 @@ from .tools.sam_tool import SegmentingTool
 from .tools.dino_tool import Text2BoxTool
 from .tools.imageediting_tool import ImageRemoveTool, ImageReplaceTool
 from .tools.weather_tool import WeatherTool
+from .tools.qwen4v_tool import QWEN4VTool
 from .utils.output_parser import ConvoOutputParser
 from .utils.agent_prompt import PREFIX, FORMAT_INSTRUCTIONS, SUFFIX
 
@@ -30,6 +31,7 @@ REGISTERED_TOOL_CLASSES = [
     ImageRemoveTool,
     ImageReplaceTool,
     WeatherTool,
+    QWEN4VTool
 ]
 
 class ReActAgent(object):
