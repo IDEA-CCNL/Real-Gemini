@@ -2,7 +2,7 @@ import requests
 
 class ImageRemoveTool(object):
     _name_ = "Remove Something From The Image"
-    _description_ = "当你想要从图片中移除某个物体或者某个物体的某个部分时很有用。输入到这个工具的应该是一个被逗号分隔成两部分的字符串，分别表示图片的路径或者图片所在的文件夹路径和要移除的物体。\nuseful when you want to remove the object or something from the photofrom its description or location.\nThe input to this tool should be a comma separated string of two, representing the image_dir or image_paths and the object need to be removed."
+    _description_ = "当你想要从图片中移除某个物体或者某个物体的某个部分时很有用。输入到这个工具的应该是一个被逗号分隔成两部分的字符串，分别表示图片的路径或者图片所在的文件夹路径和要移除的物体。useful when you want to remove the object or something from the photofrom its description or location. The input to this tool should be a comma separated string of two, representing the image_dir or image_paths and the object need to be removed."
     _return_direct_ = False
 
     def __init__(self):

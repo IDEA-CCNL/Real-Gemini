@@ -10,7 +10,38 @@ from skimage.filters.rank import entropy
 from skimage.morphology import disk
 import itertools  
 from multiprocessing import Pool
-from . import image_config as config
+
+def get_main_img(imgs, num_frames):
+    # resp = requests.post(
+    #     'http://192.168.80.29:8789/asr', 
+    #     data=input_data, 
+    #     headers={"Content-Type": "application/json"}
+    #     )
+    # resp_data = resp.json()
+    # prompt_text = resp_data["text"]
+    image_selector = ImageSelector(5)
+
+    top_frames = image_selector.select_best_frames(
+        imgs, num_frames
+    )
+
+    sorted_frames = []
+    for i in range(len(imgs)):
+        for j in range(len(top_frames)):
+            if np.all(imgs[i]==top_frames[j]):
+                sorted_frames.append(imgs[i])
+
+    return sorted_frames
+
+class ImageSelectorConfig:
+    # Setting for optimum Brightness values
+    min_brightness_value = 10.0
+    max_brightness_value = 90.0
+    brightness_step = 2.0
+    # Setting for optimum Contrast/Entropy values
+    min_entropy_value = 1.0
+    max_entropy_value = 10.0
+    entropy_step = 0.5
 
 
 class ImageSelector(object):
@@ -27,14 +58,14 @@ class ImageSelector(object):
         self.n_processes = n_processes
 
         # Setting for optimum Brightness values
-        self.min_brightness_value = config.ImageSelector.min_brightness_value
-        self.max_brightness_value = config.ImageSelector.max_brightness_value
-        self.brightness_step = config.ImageSelector.brightness_step 
+        self.min_brightness_value = ImageSelectorConfig.min_brightness_value
+        self.max_brightness_value = ImageSelectorConfig.max_brightness_value
+        self.brightness_step = ImageSelectorConfig.brightness_step 
 
         # Setting for optimum Contrast/Entropy values
-        self.min_entropy_value = config.ImageSelector.min_entropy_value
-        self.max_entropy_value = config.ImageSelector.max_entropy_value
-        self.entropy_step = config.ImageSelector.entropy_step 
+        self.min_entropy_value = ImageSelectorConfig.min_entropy_value
+        self.max_entropy_value = ImageSelectorConfig.max_entropy_value
+        self.entropy_step = ImageSelectorConfig.entropy_step 
 
     def __get_brightness_score__(self, image):
         """Internal function to compute the brightness of input image , returns brightness score between 0 to 100.0 , 
@@ -258,10 +289,14 @@ class ImageSelector(object):
         filtered_key_frames = []
         filtered_images_list = []
         # Repeat until number of frames 
-        min_brightness_values = np.arange(config.ImageSelector.min_brightness_value, -0.01, -self.brightness_step)
-        max_brightness_values = np.arange(config.ImageSelector.max_brightness_value, 100.01, self.brightness_step)
-        min_entropy_values = np.arange(config.ImageSelector.min_entropy_value, -0.01, -self.entropy_step)
-        max_entropy_values = np.arange(config.ImageSelector.max_entropy_value, 10.01, self.entropy_step)
+        min_brightness_values = np.arange(
+            ImageSelectorConfig.min_brightness_value, -0.01, -self.brightness_step)
+        max_brightness_values = np.arange(
+            ImageSelectorConfig.max_brightness_value, 100.01, self.brightness_step)
+        min_entropy_values = np.arange(
+            ImageSelectorConfig.min_entropy_value, -0.01, -self.entropy_step)
+        max_entropy_values = np.arange(
+            ImageSelectorConfig.max_entropy_value, 10.01, self.entropy_step)
 
         for (min_brightness_value, max_brightness_value, min_entropy_value, max_entropy_value) in itertools.zip_longest(min_brightness_values, max_brightness_values, min_entropy_values, max_entropy_values): 
             if min_brightness_value is None:
