@@ -30,7 +30,6 @@ class QWEN4VTool(object):
         self.image_tmp_path = os.getenv("QWEN_VL_IMAGE_TMP_PATH")
 
     def inference(self, input_str: str):
-        
         input_dict = json.loads(input_str)
         image_path = input_dict["image_input"]
         if os.path.isdir(image_path):
@@ -48,5 +47,4 @@ class QWEN4VTool(object):
         data = {"prompt": input_dict["question"], "base64_images":base64_images, "image_tmp_path":self.image_tmp_path}
         response = requests.post(url, data=data)
         response = response.json()
-
         return response
