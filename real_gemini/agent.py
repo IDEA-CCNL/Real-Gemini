@@ -91,27 +91,6 @@ class ReActAgent(object):
             output_dict = json.loads(output)
         except:
             output_dict = {"text": output}
-        if "https://oaidalleapiprodscus.blob.core.windows.net" in output:
-            links = self._find_md_links(output)
-            url = list(links.values())[0]
-            output_dict["image"] = url
-            output_dict["text"] = output.replace(url, "")
         
         return output_dict
 
-    def _find_md_links(self, md):
-        """ Return dict of links in markdown """
-
-        INLINE_LINK_RE = re.compile(r'\[([^\]]+)\]\(([^)]+)\)')
-        FOOTNOTE_LINK_TEXT_RE = re.compile(r'\[([^\]]+)\]\[(\d+)\]')
-        FOOTNOTE_LINK_URL_RE = re.compile(r'\[(\d+)\]:\s+(\S+)')
-
-        links = dict(INLINE_LINK_RE.findall(md))
-        footnote_links = dict(FOOTNOTE_LINK_TEXT_RE.findall(md))
-        footnote_urls = dict(FOOTNOTE_LINK_URL_RE.findall(md))
-
-        for key, value in footnote_links.items():
-            footnote_links[key] = footnote_urls[value]
-        links.update(footnote_links)
-        print(links)
-        return links
