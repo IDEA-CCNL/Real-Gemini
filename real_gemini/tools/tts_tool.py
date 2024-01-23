@@ -46,14 +46,12 @@ class HuoShanTTSTool(object):
     _return_direct_ = True
 
     def __init__(self):
-        self.host = os.getenv("TTS_SERVER_HOST")
-        self.port = os.getenv("TTS_SERVER_PORT")
+        self.appid = os.getenv("HUOSHAN_TTS_APPID")
+        self.access_token = os.getenv("HUOSHAN_TTS_ACCESS_TOKEN")
     
     def inference(self, input_str: str):
 
         # 填写平台申请的appid, access_token以及cluster
-        appid = "2107446508"
-        access_token= "VCgXCA6RolNIMToSF-lyOt4l5AjTZJDL"
         cluster = "volcano_tts"
 
         voice_type = "BV002_streaming"
@@ -61,12 +59,12 @@ class HuoShanTTSTool(object):
         host = "openspeech.bytedance.com"
         api_url = f"https://{host}/api/v1/tts"
 
-        header = {"Authorization": f"Bearer;{access_token}"}
+        header = {"Authorization": f"Bearer;{self.appid}"}
 
         request_json = {
             "app": {
-                "appid": appid,
-                "token": access_token,
+                "appid": self.appid,
+                "token": self.access_token,
                 "cluster": cluster
             },
             "user": {
@@ -74,7 +72,7 @@ class HuoShanTTSTool(object):
             },
             "audio": {
                 "voice_type": voice_type,
-                "encoding": "wav",
+                "encoding": "mp3",
                 "speed_ratio": 1.0,
                 "volume_ratio": 1.0,
                 "pitch_ratio": 1.0,
@@ -101,12 +99,15 @@ class HuoShanTTSTool(object):
             e.with_traceback()
 
         # write to file
-        # save_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        # save_dir = os.path.join(save_dir, "test", "outputs")
+        save_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        save_dir = os.path.join(save_dir, "test", "outputs")
         # md5 = hashlib.md5()
         # md5.update(input_str.encode('utf-8'))
         # filename = os.path.join(save_dir, md5.hexdigest() + ".wav")
         # print(filename)
         # torchaudio.save(filename, audio_array, rate)
+        filename = os.path.join(save_dir, "test_submit.mp3")
+        file_to_save = open(filename, "wb")
+        file_to_save.write(base64.b64decode(data))
 
-        return audio_array, rate, convert_to_wav_bytes(audio_array, rate)
+        return filename

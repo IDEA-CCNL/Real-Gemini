@@ -6,7 +6,7 @@ from queue import Queue
 import time
 import cv2
 from threading import Thread, Event
-from .tools.tts_tool import TTSTool, HuoShanTTSTool
+from .tools.tts_tool import TTSTool
 from .utils_st.audio2text import audio2text_from_bytes
 from .utils_st.image_selector import get_main_img
 from .utils_st.text2audio import autoplay_audio
@@ -101,8 +101,7 @@ def response(prompt=None, imgs=None, autoplay=True, audio_response=True):
                 res["text"] = "无效的语音输入"
             else:
                 if audio_response:
-                    # tts_tool = TTSTool()
-                    tts_tool = HuoShanTTSTool()
+                    tts_tool = TTSTool()
                     sound, rate, byte_sound_array = tts_tool.inference(res["text"])
                 else:
                     autoplay = False
