@@ -24,7 +24,11 @@ sh install pyaudio.sh
 cp .env.template .env
 ```
 
-然后填写对应的环境变量。
+然后填写对应的环境变量。其中，请注意以下的环境变量：
+- `GAODE_API_KEY`：请在[高德开放平台](https://lbs.amap.com/)进行申请；
+- `TTS_MODEL_PATH`：请下载[XTTS-v2](https://huggingface.co/coqui/XTTS-v2)；
+- `MUSIC_MODEL_PATH`：请下载[musicgen](https://huggingface.co/facebook/musicgen-small)；
+- `QWEN_VL_MODEL_PATH`：请下载[Qwen-VL](https://huggingface.co/Qwen/Qwen-VL-Chat)；
 
 ## 启动后端模型服务
 你可以在有GPU的后端环境中启动服务，例如启动TTS的服务。
@@ -35,6 +39,10 @@ sh scripts/start_tts_server.sh
 
 必须要启动的服务有：
 - TTS
+
+可选启动的服务有：
+- Music：当你需要生成音乐时；
+- Qwen：当你需要使用Qwen-VL替换GPT-4V时；
 
 ## 启动前端对话服务
 
