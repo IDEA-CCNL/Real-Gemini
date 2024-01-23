@@ -1,6 +1,8 @@
 # output directory
 **output/
 **outputs/
+qwen_img_buf/
+img_buf/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

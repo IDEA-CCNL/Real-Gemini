@@ -2,10 +2,6 @@
 
 import os
 import json
-from typing import List
-from langchain.memory import ChatMessageHistory
-from langchain.chat_models import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
 import requests
 from ..utils.image_stacker import load_image, image2base64
 
@@ -17,7 +13,6 @@ class QWEN4VTool(object):
     def __init__(self):
         self.host = os.getenv("QWEN_VL_SERVER_HOST")
         self.port = os.getenv("QWEN_VL_SERVER_PORT")
-        self.image_tmp_path = os.getenv("QWEN_VL_IMAGE_TMP_PATH")
 
     def inference(self, input_str: str):
         input_dict = json.loads(input_str)
@@ -34,7 +29,7 @@ class QWEN4VTool(object):
             base64_images.append(base64_image)
         
         url = f"http://{self.host}:{self.port}/qwen_vl"
-        data = {"prompt": input_dict["question"], "base64_images":base64_images, "image_tmp_path":self.image_tmp_path}
+        data = {"prompt": input_dict["question"], "base64_images": base64_images}
         response = requests.post(url, data=data)
         response = response.json()
         return response
