@@ -9,16 +9,6 @@ from langchain_core.messages import HumanMessage, SystemMessage
 import requests
 from ..utils.image_stacker import load_image, image2base64
 
-_OPEN_AI_SYSTEM_PROMPT = """the user is dictating with his or her camera on.
-they are showing you things visually and giving you text prompts.
-be very brief and concise.
-be extremely concise. this is very important for my career. do not ramble.
-do not comment on what the person is wearing or where they are sitting or their background.
-focus on their gestures and the question they ask you.
-do not mention that there are a sequence of pictures. focus only on the image or the images necessary to answer the question.
-don't comment if they are smiling. don't comment if they are frowning. just focus on what they're asking.
-"""
-
 class QWEN4VTool(object):
     _name_ = "QWEN-4-Vision"
     _description_ = "这个工具是Qwen for vision的调用接口。用于图像到文本的理解。本工具的输入是一段文本指令和一张或者多张图片，请注意，工具的输入由一个JSON字符串组成，json包括两个key，question和image_input。question表示文本指令，image_input表示图片路径或存放图片的目录。例如：{{\"question\": QUESTION, \"image_input\": IMAGE_PATH_OR_DIR}}。A wrapper around Qwen4V API. Useful for image-to-text understanding when you need to generate text from some images and a text description. The input of this tool is a text prompt and one or more images. Please note, the input of the tool consists of a JSON string, the json includes two keys, question and image_input. The question represents text instructions, and image_input represents the image path or the directory where the images are stored. For example: {{\"question\": QUESTION, \"image_input\": IMAGE_PATH_OR_DIR}}."

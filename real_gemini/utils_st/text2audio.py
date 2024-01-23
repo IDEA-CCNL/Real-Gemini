@@ -102,7 +102,7 @@ def convert_to_wav_bytes(
     data = _make_wav(cast("npt.NDArray[Any]", data), sample_rate)
     return data
 
-def autoplay_audio(bytes_audio):
+def autoplay_audio(bytes_audio, audio_type="wav"):
     # https://discuss.streamlit.io/t/how-to-play-an-audio-file-automatically-generated-using-text-to-speech-in-streamlit/33201/6
     if isinstance(bytes_audio, str): # a filename
         rate, b64_audio = scipy.io.wavfile.read(bytes_audio)
@@ -112,7 +112,7 @@ def autoplay_audio(bytes_audio):
         b64_audio = base64.b64encode(bytes_audio).decode()
     md = f"""
             <audio controls autoplay="true">
-            <source src="data:audio/wav;base64,{b64_audio}" type="audio/wav">
+            <source src="data:audio/{audio_type};base64,{b64_audio}" type="audio/{audio_type}">
             </audio>
             """
     st.markdown(
