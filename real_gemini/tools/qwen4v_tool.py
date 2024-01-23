@@ -29,7 +29,7 @@ class QWEN4VTool(object):
             base64_images.append(base64_image)
         
         url = f"http://{self.host}:{self.port}/qwen_vl"
-        data = {"prompt": input_dict["question"], "base64_images":base64_images}
+        data = {"prompt": input_dict["question"], "base64_images": base64_images}
         response = requests.post(url, data=data)
         response = response.json()
         return response

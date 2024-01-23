@@ -36,10 +36,6 @@ if __name__ == '__main__':
 
     tool = TOOL_DICT[args.tool]()
 
-    # prompt = {"question":"这是正确的顺序吗？考虑与太阳的距离并解释你的推理。", \
-    #           "image_input":os.path.join(work_dir, "test/images/reasoning_logic/reasoning_logic_1.png")}
-    # args.prompt = json.dumps(prompt)
-
     resp = tool.inference(args.prompt)
     print("resp:", resp)
 
