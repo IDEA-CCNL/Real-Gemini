@@ -1,9 +1,8 @@
 #encoding=utf8
 
 import os
-import io
 import sys
-import base64
+import shutil
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Form
@@ -11,7 +10,7 @@ from typing import List
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation import GenerationConfig
-import random
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 from real_gemini.utils.image_stacker import save_or_show_image
 
@@ -21,26 +20,25 @@ global tokenizer
 global model
 tokenizer, model = None, None
 
+def save_buf_image(image_buf_dir, base64_images):
+    if os.path.exists(image_buf_dir):
+        shutil.rmtree(image_buf_dir)
+    os.makedirs(image_buf_dir)
+    for i, base64_image in enumerate(base64_images):
+        save_or_show_image(base64_image, os.path.join(image_buf_dir, f"tmp_image_{i}.jpg"))
+
 # API端点
 @app.post("/qwen_vl/")
 async def qwen_vl(
     prompt: str = Form(...),
-    base64_images: List[str] = Form(...),
-    image_tmp_path: str = Form(...)
+    base64_images: List[str] = Form(...)
 ):
-    
-    tmp_dir = str(random.randint(0, 10e9))
-    if not os.path.exists(os.path.join(image_tmp_path, tmp_dir)):
-        os.makedirs(os.path.join(image_tmp_path, tmp_dir))
-
-    tmp_path = os.path.join(image_tmp_path, tmp_dir)
-    
-    for i, base64_image in enumerate(base64_images):
-        save_or_show_image(base64_image, os.path.join(tmp_path, f"tmp_image_{i}.jpg"))
+    image_buf_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "qwen_img_buf")
+    save_buf_image(image_buf_dir, base64_images)
 
     input_list = []
-    for file in sorted(os.listdir(tmp_path)):
-        image_path = os.path.join(tmp_path, file)
+    for file in sorted(os.listdir(image_buf_dir)):
+        image_path = os.path.join(image_buf_dir, file)
         input_list.append({'image': image_path})
     input_list.append({'text': prompt})
 
