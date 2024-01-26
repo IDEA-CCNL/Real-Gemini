@@ -162,14 +162,15 @@ if __name__ == '__main__':
                 st.audio(audio.get_wav_data())
                 st.text(f'识别后的文本：{input_text}')
                 status.update(label="输入信号处理完成", state="complete", expanded=False)
-            with chat_placeholder.container():# 1.30支持设置 height=300px
+            with chat_placeholder.container(height=600):# 1.30支持设置 height=300px
+            # with st.container(height=600):# 1.30支持设置 height=300px
                 # 容器高度设置，要等1.30版本更新，https://github.com/streamlit/streamlit/issues/2169
-                # show_chat_message_from_history() # 现在关闭展示历史，只展示单轮
+                show_chat_message_from_history() # 现在关闭展示历史，只展示单轮
                 response(prompt=input_text,imgs=imgs,autoplay=True,audio_response=True)
                 print('对话完毕，释放录音锁，打开对话锁')
                 # 对话响应完毕，打开事件
                 event_record.set()
                 # 如果没有录入输入，等待
                 event_chat.clear()
-            chat_placeholder.empty()
+            # chat_placeholder.empty()
     print('达到最大对话轮数，结束程序！')
